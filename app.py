@@ -100,4 +100,12 @@ else:
 
 st.markdown("---")
 
-# 4. 스마트 AI 피드백 문장 생성기 (v1 안정화 채널 강제 고정 버전 🛠️)
+# 4. 스마트 AI 피드백 문장 생성기 (v1 규격 명시)
+st.subheader("✍️ 4. AI 명품 종합 의견 생성")
+if not ai_available:
+    st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
+    teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
+else:
+    st.success("🤖 AI 자동 문장 생성 엔진이 정상 가동 중입니다.")
+    
+    custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="to부정사 동명사 파트 어려운데 이해
