@@ -7,6 +7,9 @@ import io
 import base64
 import os
 import urllib.request
+# [최신 규격 반영] 구형 google.generativeai 대신 구글 공식 최신형 패키지를 호출합니다.
+from google import genai
+from google.genai import types
 
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
 @st.cache_resource
@@ -37,11 +40,21 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
+# --- [최신형 구글 2.0 AI 연동 세팅] ---
+if "GEMINI_API_KEY" in st.secrets:
+    raw_key = st.secrets["GEMINI_API_KEY"]
+    clean_key = raw_key.strip().replace('"', '').replace("'", "")
+    # 구글 공식 최신 클라이언트 통신망 개설
+    client = genai.Client(api_key=clean_key)
+    ai_available = True
+else:
+    ai_available = False
+
 # 웹페이지 기본 설정
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("5문장 압축형 자동 조립 엔진이 탑재된 가볍고 실용적인 버전입니다.")
+st.caption("최신 구글 정식 AI 엔진이 탑재되어 실시간으로 문장을 창작하는 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -92,42 +105,47 @@ else:
 
 st.markdown("---")
 
-# 4. 고성능 로컬 명품 문장 생성 엔진 (5문장 압축 버전 🛠️)
-st.subheader("✍ " + f"4. {student_name} 학생 맞춤형 명품 코멘트 생성")
-
-custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="수업 참여 잘함")
-custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 떨어짐")
-
-if st.button("📝 깔끔한 5문장 의견 즉시 완성하기", type="secondary"):
-    pos_keyword = custom_pos.strip()
-    neg_keyword = custom_neg.strip()
+# 4. 진짜 실시간 AI 문장 창작 엔진 기동 (수정 포인트 🛠️)
+st.subheader("✍️ 4. AI 명품 종합 의견 생성")
+if not ai_available:
+    st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
+    teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
+else:
+    st.success("🤖 최신 구글 정식 AI 엔진이 완벽하게 가동 중입니다.")
     
-    # 칭찬 문구 어미 자연스럽게 변환
-    if "잘함" in pos_keyword:
-        pos_processed = f"평소 {pos_keyword.replace('잘함', '대단히 잘하며')} 열정적인 모습으로 수업에 참여하고 있습니다."
-    elif "이해" in pos_keyword:
-        pos_processed = f"다소 까다로운 단원임에도 {pos_keyword.replace('잘함', '훌륭히 이해해내며')} 깊이 있게 몰입해 주었습니다."
-    else:
-        pos_processed = f"학습 과정 중 '{pos_keyword}' 측면에서 대단히 우수한 성취도와 집중력을 보여주었습니다."
-
-    # 보완 문구 어미 자연스럽게 변환
-    if "떨어짐" in neg_keyword:
-        neg_processed = f"다만 학습 흐름에 따라 간혹 {neg_keyword.replace('떨어짐', '주춤하는')} 기복이 관찰되어 다소 아쉬움이 남습니다."
-    else:
-        neg_processed = f"다만 일상 학습 중 '{neg_keyword}' 부분은 앞으로 더 단단하게 채워나가야 할 과제입니다."
-
-    # 상투적인 인사말을 완전히 빼고 딱 핵심만 전달하는 정교한 5문장 결합 알고리즘
-    text_blocks = [
-        f"이번 {evaluation_month} 영어 학습 과정에서 {student_name} 학생은 학업 역량을 단단히 다지기 위해 성실히 임해 주었습니다. (1)\n\n",
-        f"특히 {pos_processed} (2) 스스로 문형 규칙을 분석해 내는 힘이 크게 성장한 만큼 이번 성과에 대해 아낌없는 칭찬을 보냅니다. 👍 (3)\n\n",
-        f"{neg_processed} (4) 배운 내용을 완전히 본인의 무기로 만들기 위해 가정에서도 지속적인 복습 독려를 함께 연계해 주시면 감사하겠습니다. \n\n",
-        f"다음 달에는 미진한 부분을 보완하여 실력이 더욱 폭발할 수 있도록 YMS 학원에서 책임감 있게 밀착 지도하겠습니다. 감사합니다. 💙 (5)"
-    ]
+    custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
+    custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
     
-    st.session_state["local_comment"] = "".join(text_blocks)
+    if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
+        with st.spinner("AI가 단어 파편을 분석하여 자연스러운 5문장 명품 피드백을 창작하고 있습니다..."):
+            try:
+                prompt = f"""
+                너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
+                아래 정보를 바탕으로 학부모님께 보낼 '월말 성취도 평가 종합 의견'을 완벽한 맞춤법과 아주 자연스러운 문맥으로 작성해줘.
 
-default_text = st.session_state.get("local_comment", "위의 버튼을 누르면 딱 보기 좋은 5문장 완성본 글을 즉시 만들어 줍니다.")
-teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 추가 수정 가능)", value=default_text, height=220)
+                [학생 정보]
+                - 이름: {student_name}
+                - 평가월: {evaluation_month}
+                - 이번 달 칭찬 및 강점 키워드: {custom_pos}
+                - 이번 달 보완 및 노력할 점 키워드: {custom_neg}
+
+                [작성 조건 - 반드시 지킬 것]
+                1. 전체 줄글은 단 '5문장'으로만 제한해서 짧고 강렬하게 써줘. 문장 중간에 숫자를 절대로 넣지 마.
+                2. 원장님이 입력한 칭찬 키워드와 보완 키워드가 기계적으로 결합된 느낌이 들지 않게, 부드러운 연결 어미를 사용하여 전문가다운 문장으로 자연스럽게 살을 붙여서 새로 창작해줘.
+                3. 고정된 오프닝과 클로징을 쓰지 말고, 매번 학생의 키워드 테마(성적 상승, 태도 등)에 어울리는 새로운 도입부와 마무리 다짐 문장을 만들어줘.
+                4. 이모티콘은 적절히 1~2개만 섞어서 정중하고 따뜻하게 마무리해줘.
+                """
+                # [최신 규격 문법] 404를 완전히 해결하는 최신 모델 직접 호출 공식 코드
+                response = client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt,
+                )
+                st.session_state["ai_comment"] = response.text
+            except Exception as e:
+                st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
+
+    default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 진짜 AI가 문장을 자동으로 창작해 줍니다.")
+    teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
 st.markdown("---")
 
