@@ -6,8 +6,9 @@ import streamlit.components.v1 as components
 import io
 import base64
 
-# 한글 깨짐 방지 설정
-matplotlib.rcParams['font.family'] = 'Malgun Gothic'
+# --- [수정 포인트 1] 서버 환경에서의 한글 깨짐 방지 폰트 설정 ---
+# 리눅스 서버용 나눔 폰트 및 시스템 기본 고딕체 순서대로 지정
+matplotlib.rcParams['font.family'] = ['sans-serif', 'Malgun Gothic', 'NanumGothic', 'AppleGothic']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 웹페이지 기본 설정
@@ -72,14 +73,14 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         diff_color = "#2e7d32" if diff >= 0 else "#c62828"
         df_html_rows += f"""
         <tr style="border-bottom: 1px solid #ddd;">
-            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #fafafa; font-family: 'Malgun Gothic';">{subj}</td>
-            <td style="padding: 10px; border: 1px solid #ddd; font-family: 'Malgun Gothic';">{past_scores[i]}점</td>
-            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A90E2; font-family: 'Malgun Gothic';">{current_scores[i]}점</td>
-            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: {diff_color}; font-family: 'Malgun Gothic';">{diff_str}</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #fafafa; font-family: sans-serif;">{subj}</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-family: sans-serif;">{past_scores[i]}점</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A90E2; font-family: sans-serif;">{current_scores[i]}점</td>
+            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: {diff_color}; font-family: sans-serif;">{diff_str}</td>
         </tr>
         """
 
-    # --- matplotlib 그래프 생성 및 이미지 주입 처리 (파일 경로 안 꼬이게 암호화 기법 사용) ---
+    # --- [수정 포인트 2] matplotlib 그래프 한글 깨짐 방지 서식 명시 ---
     fig, ax = plt.subplots(figsize=(7, 3.5))
     x_indices = range(len(subjects))
     bar_width = 0.35
@@ -87,12 +88,12 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     rects1 = ax.bar([x - bar_width/2 for x in x_indices], past_scores, bar_width, label='지난달', color='#A0C4FF')
     rects2 = ax.bar([x + bar_width/2 for x in x_indices], current_scores, bar_width, label='이번달', color='#FFADAD')
     
-    ax.set_ylabel('점수 (점)', fontfamily='Malgun Gothic')
-    ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontfamily='Malgun Gothic', fontsize=12, fontweight='bold', pad=10)
+    ax.set_ylabel('점수 (점)')
+    ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10)
     ax.set_xticks(x_indices)
-    ax.set_xticklabels(subjects, fontfamily='Malgun Gothic', fontsize=9)
+    ax.set_xticklabels(subjects, fontsize=9)
     ax.set_ylim(0, 110)
-    ax.legend(prop={'family': 'Malgun Gothic'})
+    ax.legend()
     ax.grid(axis='y', linestyle='--', alpha=0.5)
     ax.bar_label(rects1, padding=3)
     ax.bar_label(rects2, padding=3)
@@ -105,33 +106,33 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
 
-    # --- 오리지널 디자인 완벽 구현용 통합 HTML 템플릿 ---
+    # --- [수정 포인트 3] HTML 템플릿의 폰트 패밀리를 웹 표준 무결성 폰트로 변경 ---
     html_layout = f"""
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <div style="margin-bottom: 20px;">
-        <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+        <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
             📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
         </button>
     </div>
 
-    <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: 'Malgun Gothic', sans-serif; color: #333333;">
+    <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
         
         <div style="background-color:#4A90E2; padding:15px; border-radius:10px; text-align:center; margin-bottom: 20px;">
-            <h1 style="color:white; margin:0; font-size: 24px; font-family: 'Malgun Gothic'; font-weight: bold;">YMS 부송관 월말 성취도 평가</h1>
-            <p style="color:white; margin:5px 0 0 0; font-size: 14px; font-family: 'Malgun Gothic';">초등부 학업 성취도 리포트</p>
+            <h1 style="color:white; margin:0; font-size: 24px; font-family: sans-serif; font-weight: bold;">YMS 부송관 월말 성취도 평가</h1>
+            <p style="color:white; margin:5px 0 0 0; font-size: 14px; font-family: sans-serif;">초등부 학업 성취도 리포트</p>
         </div>
         
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: 'Malgun Gothic';">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
             <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>과정/학년:</b> {student_level}</div>
             <div><b>평가월:</b> {evaluation_month}</div>
         </div>
-        <div style="font-size: 14px; margin-bottom: 20px; font-family: 'Malgun Gothic';"><b>현재 사용 교재:</b> {current_book}</div>
+        <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
         
         <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
         
-        <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: 'Malgun Gothic';">📈 영역별 성취 레벨</h3>
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: 'Malgun Gothic';">
+        <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
             <thead>
                 <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #4A90E2; border-bottom: 1px solid #ddd;">
                     <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
@@ -145,15 +146,15 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             </tbody>
         </table>
         
-        <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: 'Malgun Gothic';">📊 지난달 대비 성적 추이</h3>
+        <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
         <div style="text-align: center; margin-bottom: 25px;">
             <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
         </div>
         
         <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
         
-        <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: 'Malgun Gothic';">💌 선생님 종합 의견</h3>
-        <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: 'Malgun Gothic'; color: #2b5797;">
+        <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
+        <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #2b5797;">
             {teacher_feedback.replace('\n', '<br>')}
         </div>
     </div>
@@ -161,7 +162,6 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     <script>
     function takeScreenshot() {{
         const element = document.getElementById("capture-area");
-        // 깨짐 현상을 방지하기 위해 2배 고화질(scale: 2) 렌더링 설정
         html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
             const link = document.createElement('a');
             link.download = "{evaluation_month}_{student_name}_월말평가.png";
@@ -172,5 +172,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     </script>
     """
 
-    # 스트림릿 컴포넌트 웹뷰 창에 합쳐진 폼 출력 (여유롭게 높이 950 지정)
     components.html(html_layout, height=950, scrolling=True)
