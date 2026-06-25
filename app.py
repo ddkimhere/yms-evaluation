@@ -7,7 +7,6 @@ import io
 import base64
 import os
 import urllib.request
-# 최신 구글 공식 패키지 구조로 안전하게 호출합니다.
 from google import genai
 
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
@@ -43,7 +42,6 @@ if os.path.exists("logo.jpg"):
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
-    # 2026년 표준 최신 AI 통신망 개설
     client = genai.Client(api_key=clean_key)
     ai_available = True
 else:
@@ -53,7 +51,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("구글 공식 최신 패키지와 직결되어 진짜 AI가 실시간 문장을 창작하는 버전입니다.")
+st.caption("지난달 대비 성적 변화 추이를 AI가 스스로 분석하여 리포트를 창작하는 정식 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -104,23 +102,28 @@ else:
 
 st.markdown("---")
 
-# 4. 진짜 AI 실시간 문장 창작 엔진 기동 
+# 4. 실시간 AI 생각 가동망 구축 (성적 연동 프롬프트 최적화 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
 else:
-    st.success("🤖 최신형 구글 제미나이 AI 두뇌가 완벽하게 연결되었습니다.")
+    st.success("🤖 최신형 구글 제미나이 AI가 성적 분석 모드로 활성화되었습니다.")
     
     custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
     
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
-        with st.spinner("AI가 단어 파편을 분석하여 자연스러운 5문장 명품 피드백을 창작하고 있습니다..."):
+        with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성하고 있습니다..."):
             try:
+                # AI에게 줄 점수 데이터 문자열 조립
+                score_summary = ""
+                for idx, subj in enumerate(selected_subjects):
+                    score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\n"
+
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
-                아래 정보를 바탕으로 학부모님께 보낼 '월말 성취도 평가 종합 의견'을 완벽한 맞춤법과 아주 자연스러운 문맥으로 작성해줘.
+                아래 학생의 영역별 실제 점수 변화 데이터와 원장님이 적어준 키워드를 종합적으로 분석하여, 학부모님께 보낼 '월말 성취도 평가 종합 의견'을 완전히 새로운 줄글로 창작해줘.
 
                 [학생 정보]
                 - 이름: {student_name}
@@ -128,13 +131,16 @@ else:
                 - 이번 달 칭찬 및 강점 키워드: {custom_pos}
                 - 이번 달 보완 및 노력할 점 키워드: {custom_neg}
 
+                [영역별 성적 추이 데이터]
+                {score_summary}
+
                 [작성 조건 - 반드시 지킬 것]
                 1. 전체 줄글은 단 '5문장'으로만 제한해서 짧고 강렬하게 써줘. 문장 중간이나 끝에 (1), (2) 같은 숫자를 절대로 넣지 마.
-                2. 원장님이 입력한 칭찬 키워드와 보완 키워드가 기계적으로 결합된 느낌이 들지 않게, 부드러운 연결 어미를 사용하여 전문가다운 문장으로 자연스럽게 살을 붙여서 새로 창작해줘.
-                3. 고정된 오프닝과 클로징을 쓰지 말고, 매번 학생의 키워드 테마(성적 상승, 태도 등)에 어울리는 새로운 도입부와 마무리 다짐 문장을 만들어줘.
-                4. 이모티콘은 적절히 1~2개만 섞어서 정중하고 따뜻하게 마무리해줘.
+                2. 단순히 점수를 숫자로 나열하지 말고, AI 네가 점수를 직접 비교해서 '지난달 대비 실력이 부쩍 올랐다'라거나 '안정적인 상위권을 유지 중이다'와 같이 교육 전문가의 시선에서 자연스럽게 평가 문장으로 녹여내야 해.
+                3. 원장님이 입력한 키워드들과 성적 추이가 기계적으로 꽂힌 느낌이 들지 않게 부드러운 연결 어미를 사용해줘.
+                4. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 영어 흥미를 잃지 않게" 같은 고정된 오프닝/클로징 상투어구는 절대 쓰지마. 대신 이번 성적 흐름과 칭찬 테마에 딱 들어맞는 새로운 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
+                5. 정중하고 따뜻한 어조 (~합니다 체)를 쓰고, 이모티콘은 1~2개만 자연스럽게 매칭해줘.
                 """
-                # 최신 SDK 규격에 맞추어 1.5 플래시 모델을 완벽하게 다이렉트 호출합니다.
                 response = client.models.generate_content(
                     model='gemini-1.5-flash',
                     contents=prompt,
@@ -143,7 +149,7 @@ else:
             except Exception as e:
                 st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
 
-    default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 진짜 AI가 문장을 자동으로 창작해 줍니다.")
+    default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 점수 추이를 분석한 진짜 AI 코멘트가 자동으로 창작됩니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
 st.markdown("---")
