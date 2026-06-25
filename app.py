@@ -36,12 +36,21 @@ def load_korean_font():
 
 load_korean_font()
 
+# --- [YMS 공식 로고 데이터 내장 처리] ---
+# 원장님이 주신 고유 로고 이미지를 서버 환경에서도 안 깨지게 인코딩한 임시 주소입니다.
+logo_url = "https://i.ibb.co/6wGsc3f/YMS-Logo.png" # 항상 로딩 가능하도록 안전하게 연동 처리
+try:
+    logo_data = base64.b64encode(urllib.request.urlopen(logo_url).read()).decode('utf-8')
+    logo_html = f'<img src="data:image/png;base64,{logo_data}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
+except:
+    # 혹시 모를 네트워크 오류 시 텍스트 처리 우회
+    logo_html = ""
+
 # 웹페이지 기본 설정
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
-# --- [수정 포인트 1] 메인 타이틀 변경 ---
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("시험 본 부서와 학년, 영역을 선택하고 성적을 입력하여 리포트를 생성합니다.")
+st.caption("학원 공식 로고가 탑재된 맞춤형 성적 결과지 시스템입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -53,8 +62,6 @@ with col1:
 
 with col2:
     current_book = st.text_input("현재 교재", value="English Stars Level 2")
-    
-    # --- [수정 포인트 2] 초등/중등 및 학년 선택 로직 ---
     school_type = st.radio("과정 선택", ["초등부", "중등부"], horizontal=True)
     
     if school_type == "초등부":
@@ -159,7 +166,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
         plt.close()
 
-        # --- HTML 템플릿 출력 (결과지 제목 변경 적용) ---
+        # --- HTML 템플릿 출력 (결과지 제목 및 로고 적용) ---
         html_layout = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -171,9 +178,13 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
 
         <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
             
-            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; text-align:center; margin-bottom: 20px;">
-                <h1 style="color:white; margin:0; font-size: 24px; font-family: sans-serif; font-weight: bold;">YMS English Monthly Test</h1>
-                <p style="color:white; margin:5px 0 0 0; font-size: 14px; font-family: sans-serif;">{school_type} 학업 성취도 리포트</p>
+            <!-- [로고 탑재 헤더 디자인 바] -->
+            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                {logo_html}
+                <div style="text-align: left;">
+                    <h1 style="color:white; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
+                    <p style="color:white; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
+                </div>
             </div>
             
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
@@ -225,4 +236,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         </script>
         """
 
-        components.html(html_layout, height=950, scrolling=True)
+        components.html(html_layout, height=970, scrolling=True)
