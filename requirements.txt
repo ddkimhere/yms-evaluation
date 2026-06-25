@@ -1,4 +1,4 @@
 pandas
 matplotlib
 streamlit
-google-generativeai==2.0.0
+google-generativeai
