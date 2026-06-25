@@ -7,9 +7,7 @@ import io
 import base64
 import os
 import urllib.request
-# [최신 규격 반영] 구형 google.generativeai 대신 구글 공식 최신형 패키지를 호출합니다.
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
 @st.cache_resource
@@ -40,12 +38,11 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [최신형 구글 2.0 AI 연동 세팅] ---
+# --- [AI 구글 Gemini API 연동 설정] ---
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
-    # 구글 공식 최신 클라이언트 통신망 개설
-    client = genai.Client(api_key=clean_key)
+    genai.configure(api_key=clean_key)
     ai_available = True
 else:
     ai_available = False
@@ -54,7 +51,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("최신 구글 정식 AI 엔진이 탑재되어 실시간으로 문장을 창작하는 버전입니다.")
+st.caption("안정성이 검증된 인프라 위에서 진짜 실시간 AI 문장 창작 엔진이 가동되는 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -105,41 +102,40 @@ else:
 
 st.markdown("---")
 
-# 4. 진짜 실시간 AI 문장 창작 엔진 기동 (수정 포인트 🛠️)
+# 4. 실시간 AI 생각 가동망 구축 (수정 포인트 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
 else:
-    st.success("🤖 최신 구글 정식 AI 엔진이 완벽하게 가동 중입니다.")
+    st.success("🤖 구글 제미나이 AI 실시간 창작망이 활성화되었습니다.")
     
     custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
     
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
-        with st.spinner("AI가 단어 파편을 분석하여 자연스러운 5문장 명품 피드백을 창작하고 있습니다..."):
+        with st.spinner("AI가 단어들을 연결하여 정교한 5문장 코멘트를 지어내고 있습니다..."):
             try:
+                # 임포트 에러가 없는 표준 라이브러리 경로로 모델 지정
+                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
-                아래 정보를 바탕으로 학부모님께 보낼 '월말 성취도 평가 종합 의견'을 완벽한 맞춤법과 아주 자연스러운 문맥으로 작성해줘.
+                아래 정보를 바탕으로 학부모님께 보낼 '월말 성취도 리포트 종합 의견'을 완벽한 한글 문맥으로 창작해줘.
 
                 [학생 정보]
                 - 이름: {student_name}
                 - 평가월: {evaluation_month}
-                - 이번 달 칭찬 및 강점 키워드: {custom_pos}
-                - 이번 달 보완 및 노력할 점 키워드: {custom_neg}
+                - 이번 달 칭찬 키워드: {custom_pos}
+                - 이번 달 보완 키험드: {custom_neg}
 
-                [작성 조건 - 반드시 지킬 것]
-                1. 전체 줄글은 단 '5문장'으로만 제한해서 짧고 강렬하게 써줘. 문장 중간에 숫자를 절대로 넣지 마.
-                2. 원장님이 입력한 칭찬 키워드와 보완 키워드가 기계적으로 결합된 느낌이 들지 않게, 부드러운 연결 어미를 사용하여 전문가다운 문장으로 자연스럽게 살을 붙여서 새로 창작해줘.
-                3. 고정된 오프닝과 클로징을 쓰지 말고, 매번 학생의 키워드 테마(성적 상승, 태도 등)에 어울리는 새로운 도입부와 마무리 다짐 문장을 만들어줘.
-                4. 이모티콘은 적절히 1~2개만 섞어서 정중하고 따뜻하게 마무리해줘.
+                [작성 조건 - 절대로 위배하지 말 것]
+                1. 전체 글은 정확히 '5문장'의 짧고 깔끔한 줄글 형태로만 생성해줘. 문단 구분이나 (1), (2) 같은 숫자는 절대 포함하지마.
+                2. 원장님이 단편적으로 입력한 키워드들이 기계적으로 문장에 꽂힌 느낌이 들지 않게 해줘. 예컨대 '문법 점수가 많이 오름'을 입력했다면 '문법 점수가 대폭 상승하는 뜻깊은 결과를 거두었으며'와 같이 완벽한 어미/조사 처리를 거쳐 문맥에 녹여내야 해.
+                3. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 흥미를 잃지 않게" 같은 고정된 오프닝/클로징 상투어구는 쓰지마. 대신 이번 달 학생의 칭찬 키워드 테마(성적 상승, 수업 태도 등)에 어울리는 새로운 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
+                4. 정중하고 따뜻한 어조(~합니다)를 쓰고, 이모티콘은 1~2개만 자연스럽게 매칭해줘.
                 """
-                # [최신 규격 문법] 404를 완전히 해결하는 최신 모델 직접 호출 공식 코드
-                response = client.models.generate_content(
-                    model='gemini-1.5-flash',
-                    contents=prompt,
-                )
+                response = model.generate_content(prompt)
                 st.session_state["ai_comment"] = response.text
             except Exception as e:
                 st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
