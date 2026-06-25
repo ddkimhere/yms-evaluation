@@ -36,9 +36,8 @@ def load_korean_font():
 
 load_korean_font()
 
-# --- [로고 이미지 로컬 파일 파일 로드 로직] ---
+# --- [ロ코 이미지 로컬 파일 로드 로직] ---
 logo_html = ""
-# 깃허브에 함께 올려둔 logo.jpg 파일을 시스템이 안전하게 찾아서 가져옵니다.
 if os.path.exists("logo.jpg"):
     with open("logo.jpg", "rb") as image_file:
         encoded_logo = base64.b64encode(image_file.read()).decode()
@@ -48,7 +47,7 @@ if os.path.exists("logo.jpg"):
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("학원 공식 로고와 서버 한글 깨짐 방지가 완벽히 탑재된 정식 시스템입니다.")
+st.caption("키워드 자동 코멘트 기능과 공식 로고가 탑재된 통합 시스템입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -105,12 +104,45 @@ else:
 
 st.markdown("---")
 
-# 4. 종합 피드백 입력
-st.subheader("✍️ 4. 선생님 종합 피드백")
-teacher_feedback = st.text_area(
-    "학부모님께 보낼 피드백을 적어주세요.", 
-    value="이번 달 평가 결과 전반적인 영역에서 좋은 성취를 보여주었습니다. 학원에서 항상 성실한 태도로 임하는 모습이 칭찬할 만합니다."
-)
+# --- [수정 포인트] 4. 키워드 기반 선생님 종합 피드백 자동 생성기 ---
+st.subheader("✍️ 4. 선생님 종합 피드백 설정")
+st.info("학생의 이번 달 특징을 선택하면 하단에 코멘트가 자동으로 조합됩니다. 직접 수정도 가능합니다.")
+
+# 키워드 사전 정의
+positive_keywords = {
+    "선택 안 함": "",
+    "성실한 수업 참여": "이번 달 학원 수업에 매우 긍정적이고 성실한 태도로 참여하여 모범이 되었습니다.",
+    "어휘 암기 우수": "주어진 필수 단어 암기 과제를 매번 성실하게 수행하여 높은 단어 시험 통과율을 보여주고 있습니다.",
+    "독해력 향상": "문장 구조를 파악하는 힘이 단단해져 길고 복잡한 지문도 스스로 차분하게 끊어 읽으며 정답률을 높이고 있습니다.",
+    "문법 개념 이해도 상승": "까다로운 문법 규칙과 핵심 개념을 정확하게 이해하고 문제 풀이에 잘 적용하고 있습니다.",
+    "듣기 집중력 우수": "듣기 평가 시 고도의 집중력을 발휘하여 세부 정보와 핵심 내용을 정확하게 캐치해내는 강점이 있습니다."
+}
+
+need_improvement_keywords = {
+    "선택 안 함": "",
+    "주의력 보완": "다만 듣기나 문제를 풀 때 사소한 실수를 줄이기 위해 끝까지 집중력을 유지하는 연습이 조금 더 필요합니다.",
+    "어휘 복습 필요": "다만 누적되는 단어량이 많아지면서 헷갈려하는 경우가 있어, 가정에서도 꾸준한 반복 복습을 독려해 주시면 좋겠습니다.",
+    "쓰기 꼼꼼함 요구": "다만 문장을 작성할 때 구두점(마침표 등)이나 대소문자 표기 등 사소한 디테일을 놓치지 않도록 세심한 피드백을 진행하고 있습니다.",
+    "적극적인 질문 필요": "다만 모르는 문형이 나왔을 때 조금 더 적극적으로 질문하고 해결하려는 자신감을 가질 수 있도록 지도하겠습니다."
+}
+
+col_kw1, col_kw2 = st.columns(2)
+with col_kw1:
+    pos_choice = st.selectbox("👍 이번 달 칭찬/강점 키워드 선택", list(positive_keywords.keys()))
+with col_kw2:
+    neg_choice = st.selectbox("🌱 이번 달 보완/노력 키워드 선택", list(need_improvement_keywords.keys()))
+
+# 선택된 키워드를 바탕으로 기본 문장 조합
+generated_comment = "이번 달 월말 평가 결과 리포트 안내드립니다.\n\n"
+if positive_keywords[pos_choice]:
+    generated_comment += positive_keywords[pos_choice] + " "
+if need_improvement_keywords[neg_choice]:
+    generated_comment += need_improvement_keywords[neg_choice] + " "
+
+generated_comment += f"\n\n앞으로도 {student_name} 학생이 영어에 흥미를 잃지 않고 꾸준히 성장할 수 있도록 YMS 학원에서 늘 아낌없이 격려하고 밀착 지도하겠습니다."
+
+# 최종 코멘트 확인 및 수정 가능한 입력창 연결
+teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (여기서 직접 수정·추가 가능)", value=generated_comment, height=150)
 
 st.markdown("---")
 
@@ -176,7 +208,6 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
 
         <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
             
-            <!-- [YMS 공식 로고 완벽 탑재 헤더 바] -->
             <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                 {logo_html}
                 <div style="text-align: left;">
