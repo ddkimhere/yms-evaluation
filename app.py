@@ -37,36 +37,43 @@ def load_korean_font():
 load_korean_font()
 
 # 웹페이지 기본 설정
-st.set_page_config(page_title="YMS 부송관 초등부 월말평가 결과지", layout="centered")
+st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
-st.title("📝 초등부 월말평가 결과지 생성기")
-st.caption("시험 본 영역을 선택하고 성적을 입력하면 맞춤형 웹 리포트를 생성합니다.")
+# --- [수정 포인트 1] 메인 타이틀 변경 ---
+st.title("📝 YMS English Monthly Test 생성기")
+st.caption("시험 본 부서와 학년, 영역을 선택하고 성적을 입력하여 리포트를 생성합니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
 st.subheader("👤 1. 학생 기본 정보")
 col1, col2 = st.columns(2)
 with col1:
-    student_name = st.text_input("학생 이름", value="김초등")
+    student_name = st.text_input("학생 이름", value="김YMS")
     evaluation_month = st.selectbox("평가월", ["6월", "7월", "8월", "9월", "10월", "11월", "12월"])
+
 with col2:
     current_book = st.text_input("현재 교재", value="English Stars Level 2")
-    student_level = st.text_input("레벨 (학년)", value="초등 4학년")
+    
+    # --- [수정 포인트 2] 초등/중등 및 학년 선택 로직 ---
+    school_type = st.radio("과정 선택", ["초등부", "중등부"], horizontal=True)
+    
+    if school_type == "초등부":
+        student_level = st.selectbox("학년 선택", ["초등 1학년", "초등 2학년", "초등 3학년", "초등 4학년", "초등 5학년", "초등 6학년"], index=3)
+    else:
+        student_level = st.selectbox("학년 선택", ["중등 1학년", "중등 2학년", "중등 3학년"])
 
 st.markdown("---")
 
-# --- [수정 포인트] 영역 선택 체크박스 추가 ---
+# 2. 이번 달 평가 영역 선택
 st.subheader("🎯 2. 이번 달 평가 영역 선택")
 st.info("다섯 가지 영역 중 이번 달에 시험을 치른 영역을 모두 체크해 주세요.")
 
 all_subjects = ["어휘 (Vocabulary)", "독해 (Reading)", "쓰기 (Writing)", "문법 (Grammar)", "듣기 (Listening)"]
 
-# 화면에 체크박스를 가로로 예쁘게 배치
 selected_subjects = []
 cols = st.columns(5)
 for idx, subj_name in enumerate(all_subjects):
     with cols[idx]:
-        # 기본값으로 어휘, 독해, 듣기 정도만 체크되어 있게 설정
         is_checked = subj_name in ["어휘 (Vocabulary)", "독해 (Reading)", "쓰기 (Writing)"]
         if st.checkbox(subj_name.split()[0], value=is_checked, key=f"chk_{idx}"):
             selected_subjects.append(subj_name)
@@ -82,7 +89,6 @@ current_scores = []
 if not selected_subjects:
     st.warning("⚠️ 최소 한 개 이상의 평가 영역을 선택하셔야 점수를 입력할 수 있습니다.")
 else:
-    # 선택된 영역만 반복문을 돌며 입력창 생성
     for subj in selected_subjects:
         col_subj1, col_subj2 = st.columns(2)
         with col_subj1:
@@ -98,7 +104,7 @@ st.markdown("---")
 st.subheader("✍️ 4. 선생님 종합 피드백")
 teacher_feedback = st.text_area(
     "학부모님께 보낼 피드백을 적어주세요.", 
-    value="이번 달에는 선택하신 영역 중 단어와 독해 영역에서 눈에 띄는 성장이 있었습니다! 학원에서 늘 밝은 모습으로 열심히 참여하는 멋진 학생입니다."
+    value="이번 달 평가 결과 전반적인 영역에서 좋은 성취를 보여주었습니다. 학원에서 항상 성실한 태도로 임하는 모습이 칭찬할 만합니다."
 )
 
 st.markdown("---")
@@ -111,7 +117,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         st.subheader("📋 5. 생성된 결과지 확인 및 이미지 저장")
         st.success("아래 파란색 버튼을 누르면 결과지 영역만 깔끔하게 이미지(PNG) 파일로 다운로드됩니다.")
         
-        # --- 선택된 데이터로만 HTML 표 행 생성 ---
+        # --- 데이터 처리 및 표 전송용 HTML 생성 ---
         df_html_rows = ""
         for i, subj in enumerate(selected_subjects):
             diff = current_scores[i] - past_scores[i]
@@ -126,8 +132,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             </tr>
             """
 
-        # --- 선택된 영역의 수에 맞게 그래프 동적 생성 ---
-        # 영역 개수에 따라 그래프 너비를 유연하게 조절 (1개일 때 너무 뚱뚱해지지 않게)
+        # --- 그래프 동적 생성 ---
         fig_width = max(5, len(selected_subjects) * 1.5)
         fig, ax = plt.subplots(figsize=(fig_width, 3.5))
         x_indices = range(len(selected_subjects))
@@ -139,7 +144,6 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         ax.set_ylabel('점수 (점)')
         ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10)
         ax.set_xticks(x_indices)
-        # 긴 이름 대신 '어휘', '독해' 등 앞글자만 따서 깔끔하게 그래프 축에 노출
         short_labels = [s.split()[0] for s in selected_subjects]
         ax.set_xticklabels(short_labels, fontsize=9)
         ax.set_ylim(0, 110)
@@ -155,7 +159,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
         plt.close()
 
-        # --- HTML 템플릿 출력 ---
+        # --- HTML 템플릿 출력 (결과지 제목 변경 적용) ---
         html_layout = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -168,8 +172,8 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
             
             <div style="background-color:#4A90E2; padding:15px; border-radius:10px; text-align:center; margin-bottom: 20px;">
-                <h1 style="color:white; margin:0; font-size: 24px; font-family: sans-serif; font-weight: bold;">YMS 부송관 월말 성취도 평가</h1>
-                <p style="color:white; margin:5px 0 0 0; font-size: 14px; font-family: sans-serif;">초등부 학업 성취도 리포트</p>
+                <h1 style="color:white; margin:0; font-size: 24px; font-family: sans-serif; font-weight: bold;">YMS English Monthly Test</h1>
+                <p style="color:white; margin:5px 0 0 0; font-size: 14px; font-family: sans-serif;">{school_type} 학업 성취도 리포트</p>
             </div>
             
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
@@ -213,7 +217,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             const element = document.getElementById("capture-area");
             html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
                 const link = document.createElement('a');
-                link.download = "{evaluation_month}_{student_name}_월말평가.png";
+                link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }});
