@@ -121,7 +121,7 @@ else:
                     score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
 
                 # v1beta 구형 접속망 망에서 에러가 나지 않도록 접두사를 명확히 뺀 정식 명칭 지정
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel('gemini-2.5-flash')
                 
                 prompt = f"""
                 너는 영어 전문 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
