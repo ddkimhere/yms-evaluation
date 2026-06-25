@@ -41,7 +41,7 @@ if os.path.exists("logo.jpg"):
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("고성능 자체 문장 자연어 조립 엔진이 탑재되어 지연과 에러 없는 안정적인 버전입니다.")
+st.caption("5문장 압축형 자동 조립 엔진이 탑재된 가볍고 실용적인 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -92,41 +92,41 @@ else:
 
 st.markdown("---")
 
-# 4. 고성능 로컬 명품 문장 생성 엔진 (에러율 0% + 자연어 최적화 🛠️)
+# 4. 고성능 로컬 명품 문장 생성 엔진 (5문장 압축 버전 🛠️)
 st.subheader("✍ " + f"4. {student_name} 학생 맞춤형 명품 코멘트 생성")
-st.success("✨ 입력하신 단어가 학부모용 고급 문장 스타일로 자동 가공되는 버전입니다.")
 
-custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="to부정사 동명사 파트 어려운데 이해 잘함")
-custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="과제 성실도 떨어짐")
+custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="수업 참여 잘함")
+custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 떨어짐")
 
-if st.button("📝 5~10문장 명품 의견 즉시 완성하기", type="secondary"):
+if st.button("📝 깔끔한 5문장 의견 즉시 완성하기", type="secondary"):
     pos_keyword = custom_pos.strip()
     neg_keyword = custom_neg.strip()
     
-    # 조사가 중복되거나 어색하게 꼬이는 현상을 방지하기 위한 스마트 자연어 필터링
-    if "파트" in pos_keyword and "학습했는데" not in pos_keyword:
-        pos_processed = f"학생들이 대개 까다로워하는 {pos_keyword}을(를) 집중적으로 공부했는데, 핵심 개념을 아주 명쾌하게 파악하고"
+    # 칭찬 문구 어미 자연스럽게 변환
+    if "잘함" in pos_keyword:
+        pos_processed = f"평소 {pos_keyword.replace('잘함', '대단히 잘하며')} 열정적인 모습으로 수업에 참여하고 있습니다."
+    elif "이해" in pos_keyword:
+        pos_processed = f"다소 까다로운 단원임에도 {pos_keyword.replace('잘함', '훌륭히 이해해내며')} 깊이 있게 몰입해 주었습니다."
     else:
-        pos_processed = f"학습 과정 중 '{pos_keyword}' 부분에서 대단히 뛰어난 집중력을 발휘해 주었으며, 관련 개념을 올바르게 파악하고"
+        pos_processed = f"학습 과정 중 '{pos_keyword}' 측면에서 대단히 우수한 성취도와 집중력을 보여주었습니다."
 
-    if "과제" in neg_keyword or "숙제" in neg_keyword:
-        neg_processed = f"최근 들어 {neg_keyword}는 경향을 다소 보여 학업의 연속성 면에서 약간의 아쉬움이 남습니다. 학원 수업 내용을 완벽히 살로 만들려면 철저한 이행이 필수적인 만큼"
+    # 보완 문구 어미 자연스럽게 변환
+    if "떨어짐" in neg_keyword:
+        neg_processed = f"다만 학습 흐름에 따라 간혹 {neg_keyword.replace('떨어짐', '주춤하는')} 기복이 관찰되어 다소 아쉬움이 남습니다."
     else:
-        neg_processed = f"일상 학습 중 '{neg_keyword}' 측면에서 다소 기복이나 보완이 필요한 타이밍입니다. 배운 내용을 완벽히 본인의 무기로 만들기 위해서는"
+        neg_processed = f"다만 일상 학습 중 '{neg_keyword}' 부분은 앞으로 더 단단하게 채워나가야 할 과제입니다."
 
-    # 군더더기를 걷어내고 딱 좋은 분량(7문장 내외)으로 완성되는 고정 프리미엄 템플릿
+    # 상투적인 인사말을 완전히 빼고 딱 핵심만 전달하는 정교한 5문장 결합 알고리즘
     text_blocks = [
-        f"안녕하세요, YMS 영어학원입니다. 항상 학원의 교육 방향을 믿고 소중한 자녀를 믿고 맡겨주시는 학부모님께 깊은 감사를 드립니다. 😊\n\n",
-        f"이번 {evaluation_month} 학습 과정에서 {student_name} 학생은 기본 영어 역량을 단단히 다지기 위해 대단히 열정적인 모습으로 수업에 임해 주었습니다. ",
-        f"{pos_processed} 교재 지문을 막힘없이 분석해 내는 훌륭한 성취 레벨을 보여주었습니다. 어려운 문형 규칙을 스스로 분석해 내는 힘이 크게 성장한 만큼, 이 성과에 대해 아낌없는 칭찬을 꼭 전하고 싶습니다. 👍\n\n",
-        f"다만, {neg_processed}, 가정에서도 규칙적인 학습 루틴을 채워나갈 수 있도록 지속적인 격려와 지도 협조를 함께 연계해 주시면 감사하겠습니다. \n\n",
-        f"체계적인 흐름을 잘 유지하여 다음 달에는 학업 성취도가 더욱 단단하게 다져질 수 있도록 세심하게 밀착 클리닉과 개별 지도를 진행하겠습니다. ",
-        f"앞으로도 {student_name} 학생이 영어에 대한 흥미를 잃지 않고 자신감 있게 대형 성장을 이어갈 수 있도록, 저희 YMS 학원 강사진 일동이 언제나 부모님과 같은 마음으로 밀착 마크하고 정성껏 지도하겠습니다. 감사합니다. 💙"
+        f"이번 {evaluation_month} 영어 학습 과정에서 {student_name} 학생은 학업 역량을 단단히 다지기 위해 성실히 임해 주었습니다. (1)\n\n",
+        f"특히 {pos_processed} (2) 스스로 문형 규칙을 분석해 내는 힘이 크게 성장한 만큼 이번 성과에 대해 아낌없는 칭찬을 보냅니다. 👍 (3)\n\n",
+        f"{neg_processed} (4) 배운 내용을 완전히 본인의 무기로 만들기 위해 가정에서도 지속적인 복습 독려를 함께 연계해 주시면 감사하겠습니다. \n\n",
+        f"다음 달에는 미진한 부분을 보완하여 실력이 더욱 폭발할 수 있도록 YMS 학원에서 책임감 있게 밀착 지도하겠습니다. 감사합니다. 💙 (5)"
     ]
     
     st.session_state["local_comment"] = "".join(text_blocks)
 
-default_text = st.session_state.get("local_comment", "위의 버튼을 누르면 원장님의 키워드를 분석해 5~10문장 사이의 명품 완성본 글을 즉시 만들어 줍니다.")
+default_text = st.session_state.get("local_comment", "위의 버튼을 누르면 딱 보기 좋은 5문장 완성본 글을 즉시 만들어 줍니다.")
 teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 추가 수정 가능)", value=default_text, height=220)
 
 st.markdown("---")
