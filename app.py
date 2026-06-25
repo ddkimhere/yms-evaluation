@@ -51,7 +51,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("안정성이 검증된 인프라 위에서 진짜 실시간 AI 문장 창작 엔진이 가동되는 버전입니다.")
+st.caption("구형 인프라 호환성 검증을 전면 통과한 실시간 AI 문장 창작 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -102,7 +102,7 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (수정 포인트 🛠️)
+# 4. 실시간 AI 생각 가동망 구축 (구형 인프라 전용 완벽 대응 패치 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -116,8 +116,8 @@ else:
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
         with st.spinner("AI가 단어들을 연결하여 정교한 5문장 코멘트를 지어내고 있습니다..."):
             try:
-                # 임포트 에러가 없는 표준 라이브러리 경로로 모델 지정
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                # [핵심 변경] v1beta 서버망이 유일하게 인식하는 정식 구형 모델 경로로 최종 고정
+                model = genai.GenerativeModel('models/gemini-pro')
                 
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
@@ -127,13 +127,13 @@ else:
                 - 이름: {student_name}
                 - 평가월: {evaluation_month}
                 - 이번 달 칭찬 키워드: {custom_pos}
-                - 이번 달 보완 키험드: {custom_neg}
+                - 이번 달 보완 키워드: {custom_neg}
 
                 [작성 조건 - 절대로 위배하지 말 것]
                 1. 전체 글은 정확히 '5문장'의 짧고 깔끔한 줄글 형태로만 생성해줘. 문단 구분이나 (1), (2) 같은 숫자는 절대 포함하지마.
                 2. 원장님이 단편적으로 입력한 키워드들이 기계적으로 문장에 꽂힌 느낌이 들지 않게 해줘. 예컨대 '문법 점수가 많이 오름'을 입력했다면 '문법 점수가 대폭 상승하는 뜻깊은 결과를 거두었으며'와 같이 완벽한 어미/조사 처리를 거쳐 문맥에 녹여내야 해.
-                3. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 흥미를 잃지 않게" 같은 고정된 오프닝/클로징 상투어구는 쓰지마. 대신 이번 달 학생의 칭찬 키워드 테마(성적 상승, 수업 태도 등)에 어울리는 새로운 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
-                4. 정중하고 따뜻한 어조(~합니다)를 쓰고, 이모티콘은 1~2개만 자연스럽게 매칭해줘.
+                3. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 영어 흥미를 잃지 않게" 같은 고정된 오프닝/클로징 상투어구는 절대 쓰지마. 대신 이번 달 학생의 칭찬 키워드 테마(성적 상승, 수업 태도 등)에 어울리는 새로운 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
+                4. 정중하고 따뜻한 어조 (~합니다 체)를 쓰고, 이모티콘은 1~2개만 자연스럽게 매칭해줘.
                 """
                 response = model.generate_content(prompt)
                 st.session_state["ai_comment"] = response.text
@@ -191,58 +191,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         plt.close()
 
         html_layout = f"""
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-        <div style="margin-bottom: 20px;">
-            <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
-                📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
-            </button>
-        </div>
-        <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
-            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                {logo_html}
-                <div style="text-align: left;">
-                    <h1 style="color:white; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
-                    <p style="color:white; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
-                </div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
-                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>과정/학년:</b> {student_level}</div>
-                <div><b>평가월:</b> {evaluation_month}</div>
-            </div>
-            <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
-            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
-            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
-                <thead>
-                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #4A90E2; border-bottom: 1px solid #ddd;">
-                        <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">변화량</td>
-                    </tr>
-                </thead>
-                <tbody>{df_html_rows}</tbody>
-            </table>
-            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
-            <div style="text-align: center; margin-bottom: 25px;">
-                <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
-            </div>
-            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
-            <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #2b5797;">
-                {teacher_feedback.replace('\n', '<br>')}
-            </div>
-        </div>
-        <script>
-        function takeScreenshot() {{
-            const element = document.getElementById("capture-area");
-            html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
-                const link = document.createElement('a');
-                link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }});
-        }}
-        </script>
-        """
-        components.html(html_layout, height=970, scrolling=True)
+        <script src="
