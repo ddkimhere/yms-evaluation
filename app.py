@@ -5,11 +5,40 @@ import matplotlib
 import streamlit.components.v1 as components
 import io
 import base64
+import os
+import urllib.request
 
-# --- [수정 포인트 1] 서버 환경에서의 한글 깨짐 방지 폰트 설정 ---
-# 리눅스 서버용 나눔 폰트 및 시스템 기본 고딕체 순서대로 지정
-matplotlib.rcParams['font.family'] = ['sans-serif', 'Malgun Gothic', 'NanumGothic', 'AppleGothic']
-matplotlib.rcParams['axes.unicode_minus'] = False
+# --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
+@st.cache_resource
+def load_korean_font():
+    # 인터넷 서버에 폰트 폴더 생성
+    font_dir = "fonts"
+    if not os.path.exists(font_dir):
+        os.makedirs(font_dir)
+    
+    font_path = os.path.join(font_dir, "NanumGothic.ttf")
+    
+    # 나눔고딕 폰트 파일이 없으면 인터넷에서 다운로드
+    if not os.path.exists(font_path):
+        url = "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf"
+        try:
+            urllib.request.urlretrieve(url, font_path)
+        except Exception as e:
+            pass
+            
+    # matplotlib에 다운로드한 한글 폰트 등록
+    if os.path.exists(font_path):
+        import matplotlib.font_manager as fm
+        fm.fontManager.addfont(font_path)
+        prop = fm.FontProperties(fname=font_path)
+        plt.rc('font', family=prop.get_name())
+    else:
+        plt.rc('font', family='sans-serif')
+        
+    matplotlib.rcParams['axes.unicode_minus'] = False
+
+# 폰트 로드 함수 실행
+load_korean_font()
 
 # 웹페이지 기본 설정
 st.set_page_config(page_title="YMS 부송관 초등부 월말평가 결과지", layout="centered")
@@ -80,7 +109,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         </tr>
         """
 
-    # --- [수정 포인트 2] matplotlib 그래프 한글 깨짐 방지 서식 명시 ---
+    # --- matplotlib 그래프 생성 및 이미지 주입 처리 ---
     fig, ax = plt.subplots(figsize=(7, 3.5))
     x_indices = range(len(subjects))
     bar_width = 0.35
@@ -106,7 +135,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
 
-    # --- [수정 포인트 3] HTML 템플릿의 폰트 패밀리를 웹 표준 무결성 폰트로 변경 ---
+    # --- HTML 템플릿의 폰트 설정을 시스템 기본 고딕(sans-serif)으로 강제 적용 ---
     html_layout = f"""
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
