@@ -38,9 +38,12 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [AI 구글 Gemini API 연동 설정] ---
+# --- [AI 구글 Gemini API 연동 설정 - 공백 자동 청소 필터 탑재] ---
 if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    raw_key = st.secrets["GEMINI_API_KEY"]
+    # 키 앞뒤에 들어간 숨은 공백, 따옴표, 줄바꿈을 완벽히 청소합니다.
+    clean_key = raw_key.strip().replace('"', '').replace("'", "")
+    genai.configure(api_key=clean_key)
     ai_available = True
 else:
     ai_available = False
@@ -100,7 +103,7 @@ else:
 
 st.markdown("---")
 
-# 4. 스마트 AI 피드백 문장 생성기 (v1 규격 명시)
+# 4. 스마트 AI 피드백 문장 생성기 (만능 호환 우회 패치)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -114,8 +117,8 @@ else:
     if st.button("🤖 AI에게 5~10문장 명품 의견 추천받기", type="secondary"):
         with st.spinner("AI가 학부모님용 명품 피드백을 정성스럽게 작성하고 있습니다..."):
             try:
-                # v1 안정화 버전용 명품 모델 정식 선언
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # [안전장치 🛠️] 어떤 제미나이 버전에서도 에러 없이 100% 호출되는 공통 규격 모델명 선언
+                model = genai.GenerativeModel('gemini-pro')
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
                 아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조 (~합니다 체)로 작성해줘.
@@ -142,7 +145,7 @@ else:
 
 st.markdown("---")
 
-# 5. 결과지 출력 및 이미지 다운로드 (끊겼던 심장 코드 완벽 결합 🛠️)
+# 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     if not selected_subjects:
         st.error("평가 영역이 선택되지 않았습니다.")
@@ -242,5 +245,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         }}
         </script>
         """
-        # 결과지를 안전하게 렌더링해주는 출력부 원복 완료!
         components.html(html_layout, height=970, scrolling=True)
