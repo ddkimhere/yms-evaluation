@@ -214,7 +214,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
-                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>과정/학년:</b> {student_level}</div>
+                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> {student_level}</div>
                 <div><b>평가월:</b> {evaluation_month}</div>
             </div>
             <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
