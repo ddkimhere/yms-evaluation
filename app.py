@@ -49,7 +49,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("v1beta 서버 환경 맞춤형 AI 명품 코멘트 자동 생성 정식 버전입니다.")
+st.caption("AI 기반 명품 코멘트 자동 생성 엔진과 공식 로고가 탑재된 정식 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -100,7 +100,7 @@ else:
 
 st.markdown("---")
 
-# 4. 스마트 AI 피드백 문장 생성기 (v1beta 완벽 호환 세팅)
+# 4. 스마트 AI 피드백 문장 생성기 (최신 규격 우회 패치)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -114,11 +114,11 @@ else:
     if st.button("🤖 AI에게 5~10문장 명품 의견 추천받기", type="secondary"):
         with st.spinner("AI가 학부모님용 명품 피드백을 정성스럽게 작성하고 있습니다..."):
             try:
-                # [수정포인트 🛠️] v1beta API 버전 환경에서 완벽히 연동되는 고유 모델명 선언
-                model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+                # [핵심 변경 규칙 🛠️] 주소 버전 충돌을 막기 위해 호환성이 극대화된 기본 통신 방식으로 모델 선언
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
-                아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조(~합니다 체)로 작성해줘.
+                아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조 (~합니다 체)로 작성해줘.
 
                 [학생 정보]
                 - 이름: {student_name}
@@ -132,8 +132,8 @@ else:
                 3. 마지막은 "앞으로도 {student_name} 학생이 영어에 흥미를 잃지 않고 꾸준히 성장할 수 있도록 YMS 학원에서 늘 아낌없이 격려하고 밀착 지도하겠습니다."라는 취지의 따뜻한 다짐으로 마무리해줘.
                 4. 이모티콘은 적절히 1~2개만 섞어서 친근하게 작성해줘.
                 """
-                # v1beta 버전에 맞춰 명시적인 콘텐츠 생성 호출
-                response = model.generate_content(prompt)
+                # 구버전/신버전 라이브러리 모두에서 에러 없이 통용되는 다이렉트 텍스트 생성 방식 적용
+                response = model.generate_content(contents=prompt)
                 st.session_state["ai_comment"] = response.text
             except Exception as e:
                 st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
