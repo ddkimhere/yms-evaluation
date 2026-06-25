@@ -7,7 +7,8 @@ import io
 import base64
 import os
 import urllib.request
-import google.generativeai as genai
+# 2026년형 구글 공식 최신 패키지 구조 호출
+from google import genai
 
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
 @st.cache_resource
@@ -38,11 +39,12 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [AI 구글 Gemini API 연동 설정 - 공백 청소 포함] ---
+# --- [AI 구글 최신형 API 연동 설정] ---
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
-    genai.configure(api_key=clean_key)
+    # 최신 표준 클라이언트 통신망 개설
+    client = genai.Client(api_key=clean_key)
     ai_available = True
 else:
     ai_available = False
@@ -51,7 +53,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("지난달 대비 성적 변화 추이를 AI가 스스로 분석하여 리포트를 창작하는 정식 버전입니다.")
+st.caption("구글 최신 인프라와 직결되어 진짜 AI가 실시간 문장을 창작하는 정식 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -102,48 +104,50 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (v1beta 레거시 완벽 호환 고정 🛠️)
+# 4. 2026형 진짜 AI 실시간 문장 창작 엔진 기동 
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
 else:
-    st.success("🤖 구글 제미나이 AI가 성적 분석 및 실시간 창작 모드로 활성화되었습니다.")
+    st.success("🤖 최신형 구글 제미나이 AI가 완벽하게 연결되었습니다.")
     
     custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
     
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
-        with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성하고 있습니다..."):
+        with st.spinner("AI가 점수 변화와 키워드를 융합하여 정교한 5문장 피드백을 창작하고 있습니다..."):
             try:
+                # 입력된 점수 데이터를 동적으로 융합
                 score_summary = ""
                 for idx, subj in enumerate(selected_subjects):
-                    score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
+                    score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\n"
 
-                # [수정포인트 🛠️] v1beta 구형 접속망이 유일하게 무조건 승인하는 공식 레거시 규격명 지정
-                model = genai.GenerativeModel('models/gemini-pro')
-                
                 prompt = f"""
-                너는 영어 전문 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
-                아래 학생의 영역별 실제 점수 변화 데이터와 원장님이 적어준 키워드를 종합적으로 분석하여, 학부모님께 보낼 '월말 성취도 평가 종합 의견'을 완전히 새로운 줄글로 창작해줘.
+                너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
+                아래 학생의 영역별 실제 점수 변화 데이터와 원장님이 적어준 키워드를 종합적으로 분석하여, 학부모님께 보낼 '월말 성취도 리포트'용 종합 의견을 완전히 새로운 줄글로 창작해줘.
 
                 [학생 정보]
                 - 이름: {student_name}
                 - 평가월: {evaluation_month}
                 - 이번 달 칭찬 및 강점 키워드: {custom_pos}
-                - 이번 달 보완 및 노력할 점 키워드: {custom_neg}
+                - 이번 달 보완 및 노력할 점 키워: {custom_neg}
 
                 [영역별 성적 추이 데이터]
                 {score_summary}
 
-                [작성 조건 - 반드시 누락 없이 지킬 것]
-                1. 전체 줄글은 처음부터 끝까지 끊김 없이 딱 '5문장'으로만 제한해서 짧고 강렬하게 완성해줘. 문장 중간이나 끝에 (1), (2) 같은 숫자는 절대 포함하지마.
-                2. 단순히 점수를 숫자로 나열하지 말고, 네가 점수를 직접 비교해서 '지난달 대비 실력이 부쩍 성장했다'라거나 '상위권 성적을 안정적이고 탄탄하게 유지 중이다'와 같이 교육 전문가의 시선에서 자연스럽게 풀어써줘.
-                3. 원장님이 입력한 키워드들이 기계적으로 문장에 꽂힌 느낌이 들지 않게 자연스러운 연결 어미를 사용해줘.
-                4. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 영어 흥미를 잃지 않게 지도하겠습니다" 같은 상투적이고 뻔한 오프닝/클로징 고정 문구는 절대 쓰지마. 대신 이번 성적 흐름과 칭찬 테마에 딱 들어맞는 신선한 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
+                [작성 조건 - 절대로 위배하지 말 것]
+                1. 전체 글은 처음부터 끝까지 끊김 없이 딱 '5문장'으로만 제한해서 짧고 강렬하게 써줘. 문장 중간이나 끝에 (1), (2) 같은 숫자는 절대 포함하지마.
+                2. 단순히 점수를 숫자로 나열하지 말고, 네가 점수를 직접 비교해서 '지난달 대비 실력이 부쩍 성장했다'라거나 '안정적인 상위권을 탄탄히 유지 중이다'와 같이 교육 전문가의 시선에서 자연스럽게 풀어써줘.
+                3. 원장님이 입력한 키워드들이 기계적으로 문장에 꽂힌 느낌이 들지 않게 부드러운 연결 어미를 사용해줘.
+                4. "안녕하세요 항상 지지해주셔서 감사합니다", "앞으로 영어 흥미를 잃지 않게" 같은 고정된 오프닝/클로징 상투어구는 절대 쓰지마. 대신 이번 성적 흐름과 칭찬 테마에 딱 들어맞는 정중한 도입문과 원장으로서의 새로운 다짐 문장을 즉석에서 창작해줘.
                 5. 정중하고 따뜻한 어조 (~합니다 체)를 쓰고, 이모티콘은 1~2개만 자연스럽게 매칭해줘.
                 """
-                response = model.generate_content(prompt)
+                # 최신 SDK 문법형 gemini-1.5-flash 직결 호출
+                response = client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt,
+                )
                 st.session_state["ai_comment"] = response.text
             except Exception as e:
                 st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
@@ -156,7 +160,7 @@ st.markdown("---")
 # 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     if not selected_subjects:
-        st.error("평가 영역이 선택되지었습니다.")
+        st.error("평가 영역이 선택되지 않았습니다.")
     else:
         st.subheader("📋 5. 생성된 결과지 확인 및 이미지 저장")
         
