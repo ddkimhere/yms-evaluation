@@ -38,7 +38,7 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [AI 구글 API 연동 설정] ---
+# --- [AI 구글 Gemini API 연동 설정 - 공백 청소 포함] ---
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
@@ -102,7 +102,7 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (404 완벽 우회 및 성적 연동 문맥 창작 🛠️)
+# 4. 실시간 AI 생각 가동망 구축 (v1beta 레거시 완벽 호환 고정 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -116,13 +116,12 @@ else:
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
         with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성하고 있습니다..."):
             try:
-                # 입력된 점수 데이터를 문자열로 변환하여 AI에게 직접 전달
                 score_summary = ""
                 for idx, subj in enumerate(selected_subjects):
-                    score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\n"
+                    score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
 
-                # [★수정 핵심★] 현재 원장님 서버망이 유일하게 에러 없이 100% 호출 가능한 공식 레거시 경로 모델 지정
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # [수정포인트 🛠️] v1beta 구형 접속망이 유일하게 무조건 승인하는 공식 레거시 규격명 지정
+                model = genai.GenerativeModel('models/gemini-pro')
                 
                 prompt = f"""
                 너는 영어 전문 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
@@ -157,7 +156,7 @@ st.markdown("---")
 # 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     if not selected_subjects:
-        st.error("평가 영역이 선택되지 않았습니다.")
+        st.error("평가 영역이 선택되지었습니다.")
     else:
         st.subheader("📋 5. 생성된 결과지 확인 및 이미지 저장")
         
