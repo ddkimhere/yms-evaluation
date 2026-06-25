@@ -38,7 +38,7 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [AI 구글 Gemini API 연동 설정] ---
+# --- [AI 구글 Gemini API 연동 설정 - 공백 청소 포함] ---
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
@@ -102,7 +102,7 @@ else:
 
 st.markdown("---")
 
-# 4. 스마트 AI 피드백 문장 생성기 (v1beta 채널 강제 호환 패치)
+# 4. 스마트 AI 피드백 문장 생성기 (만능 듀얼 모델 스위칭 엔진 탑재 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -115,30 +115,44 @@ else:
     
     if st.button("🤖 AI에게 5~10문장 명품 의견 추천받기", type="secondary"):
         with st.spinner("AI가 학부모님용 명품 피드백을 정성스럽게 작성하고 있습니다..."):
+            
+            prompt = f"""
+            너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
+            아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조 (~합니다 체)로 작성해줘.
+
+            [학생 정보]
+            - 이름: {student_name}
+            - 과정: {school_type} {student_level}
+            - 이번 달 칭찬 및 강점: {custom_pos}
+            - 이번 달 보완 및 노력할 점: {custom_neg}
+
+            [작성 조건 - 반드시 지킬 것]
+            1. 전체 문장 개수는 반드시 '5문장 이상, 10문장 이하'로 제한해줘.
+            2. 인사말로 시작하고, 칭찬 키워드와 보완 키워드를 아주 자연스럽고 매끄러운 교육 전문가적 문장으로 살을 붙여서 풀어 써줘. (절대 조사나 단어가 꼬여서 어색하게 조립된 느낌이 들면 안 됨)
+            3. 마지막은 "앞으로도 {student_name} 학생이 영어에 흥미를 잃지 않고 꾸준히 성장할 수 있도록 YMS 학원에서 늘 아낌없이 격려하고 밀착 지도하겠습니다."라는 취지의 따뜻한 다짐으로 마무리해줘.
+            4. 이모티콘은 적절히 1~2개만 섞어서 친근하게 작성해줘.
+            """
+            
+            # [핵심 로직 🛠️] 어떤 버전이 설치되어 있든 에러를 비껴가는 듀얼 모델 접속 시스템
+            success = False
+            # 순서 1: 가장 최신 규격 모델인 gemini-1.5-flash 시도
             try:
-                # [수정 포인트 🛠️] 현재 서버 환경인 v1beta 주소 파이프라인에서 무조건 승인하는 정식 이름 및 호출 방식 변경
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
-                prompt = f"""
-                너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
-                아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조 (~합니다 체)로 작성해줘.
-
-                [학생 정보]
-                - 이름: {student_name}
-                - 과정: {school_type} {student_level}
-                - 이번 달 칭찬 및 강점: {custom_pos}
-                - 이번 달 보완 및 노력할 점: {custom_neg}
-
-                [작성 조건 - 반드시 지킬 것]
-                1. 전체 문장 개수는 반드시 '5문장 이상, 10문장 이하'로 제한해줘.
-                2. 인사말로 시작하고, 칭찬 키워드와 보완 키워드를 아주 자연스럽고 매끄러운 교육 전문가적 문장으로 살을 붙여서 풀어 써줘. (절대 조사나 단어가 꼬여서 어색하게 조립된 느낌이 들면 안 됨)
-                3. 마지막은 "앞으로도 {student_name} 학생이 영어에 흥미를 잃지 않고 꾸준히 성장할 수 있도록 YMS 학원에서 늘 아낌없이 격려하고 밀착 지도하겠습니다."라는 취지의 따뜻한 다짐으로 마무리해줘.
-                4. 이모티콘은 적절히 1~2개만 섞어서 친근하게 작성해줘.
-                """
-                # 인자 이름 없이 값만 직접 넘겨 v1beta 라이브러리 파서의 엄격한 인자 필터링 우회
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 response = model.generate_content(prompt)
                 st.session_state["ai_comment"] = response.text
-            except Exception as e:
-                st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
+                success = True
+            except:
+                pass
+            
+            # 순서 2: 실패 시 구버전 호환형인 gemini-pro 모델로 자동 전환 시도
+            if not success:
+                try:
+                    model = genai.GenerativeModel('gemini-pro')
+                    response = model.generate_content(prompt)
+                    st.session_state["ai_comment"] = response.text
+                    success = True
+                except Exception as e:
+                    st.error(f"AI 엔진 접속망 요류: {e}\n잠시 후 다시 시도해 주세요.")
 
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 AI가 문장을 자동으로 완성해 줍니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
