@@ -51,7 +51,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("최신 구글 정식 gemini-1.5-flash AI 엔진이 탑재된 실시간 문장 창작 버전입니다.")
+st.caption("구형 주소 파이프라인 우회 패치가 완료된 실시간 AI 문장 창작 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -102,7 +102,7 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (gemini-1.5-flash 모델 최적화 세팅 🛠️)
+# 4. 실시간 AI 문장 창작 엔진 (v1beta 풀네임 매칭 패치 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -116,8 +116,8 @@ else:
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
         with st.spinner("AI가 단어들을 연결하여 정교한 5문장 코멘트를 지어내고 있습니다..."):
             try:
-                # [★최신 모델 직결★] 원장님 계정 플랜에 맞춰 1.5 플래시 모델로 정확히 연동합니다.
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # [★수정 핵심★] v1beta 통로망이 강제 규격화할 수 있도록 앞부분에 'models/' 풀 주소를 명시합니다.
+                model = genai.GenerativeModel('models/gemini-1.5-flash')
                 
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
