@@ -104,11 +104,11 @@ else:
 
 st.markdown("---")
 
-# --- [수정 포인트] 4. 키워드 기반 선생님 종합 피드백 자동 생성기 (직접 입력 진화) ---
+# 4. 선생님 종합 피드백 자동 생성기 (레이아웃 밀림 해결 버전 🛠️)
 st.subheader("✍️ 4. 선생님 종합 피드백 설정")
 st.info("학생의 특징을 선택하시거나 '직접 입력'을 활용해 보세요.")
 
-# 키워드 사전 정의
+# 키워드 데이터 사전 정의
 positive_keywords = {
     "선택 안 함": "",
     "✍️ 직접 입력하기": "CUSTOM",
@@ -128,11 +128,162 @@ need_improvement_keywords = {
     "적극적인 질문 필요": "다만 모르는 문형이 나왔을 때 조금 더 적극적으로 질문하고 해결하려는 자신감을 가질 수 있도록 지도하겠습니다."
 }
 
-col_kw1, col_kw2 = st.columns(2)
 pos_text = ""
 neg_text = ""
 
-with col_kw1:
-    pos_choice = st.selectbox("👍 이번 달 칭찬/강점 키워드 선택", list(positive_keywords.keys()))
-    if pos_choice == "✍️ 직접 입력하기":
-        custom_pos
+# 칭찬 섹션 (밀림 현상 방지를 위해 위아래 세로 배치)
+pos_choice = st.selectbox("👍 이번 달 칭찬/강점 키워드 선택", list(positive_keywords.keys()))
+if pos_choice == "✍️ 직접 입력하기":
+    custom_pos = st.text_input("칭찬하고 싶은 핵심 키워드 입력", value="숙제 완성도 우수")
+    if custom_pos:
+        pos_text = f"이번 달 학습 과정에서 {custom_pos}(이)라는 긍정적인 변화와 뛰어난 성취를 보여주어 큰 칭찬을 해주고 싶습니다."
+else:
+    pos_text = positive_keywords[pos_choice]
+
+st.write("") # 간격 확보
+
+# 보완 섹션
+neg_choice = st.selectbox("🌱 이번 달 보완/노력 키워드 선택", list(need_improvement_keywords.keys()))
+if neg_choice == "✍️ 직접 입력하기":
+    custom_neg = st.text_input("보완하고 싶은 핵심 키워드 입력", value="테스트 시 오답 검토")
+    if custom_neg:
+        neg_text = f"다만 학습 효율을 극대화하기 위해 향후 {custom_neg} 부분에 조금 더 세심한 주의와 연습을 기울이면 더욱 크게 발전할 것입니다."
+else:
+    neg_text = need_improvement_keywords[neg_choice]
+
+st.write("")
+
+# 문장 통합 자동 조립
+generated_comment = "이번 달 월말 평가 결과 리포트 안내드립니다.\n\n"
+if pos_text:
+    generated_comment += pos_text + " "
+if neg_text:
+    generated_comment += neg_text + " "
+
+generated_comment += f"\n\n앞으로도 {student_name} 학생이 영어에 흥미를 잃지 않고 꾸준히 성장할 수 있도록 YMS 학원에서 늘 아낌없이 격려하고 밀착 지도하겠습니다."
+
+# 최종 편집 텍스트 박스
+teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (여기서 자유롭게 편집·추가 가능)", value=generated_comment, height=150)
+
+st.markdown("---")
+
+# 5. 결과지 출력 버튼 및 로직
+if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
+    if not selected_subjects:
+        st.error("평가 영역이 선택되지 않아 결과지를 생성할 수 없습니다.")
+    else:
+        st.subheader("📋 5. 생성된 결과지 확인 및 이미지 저장")
+        st.success("아래 파란색 버튼을 누르면 결과지 영역만 깔끔하게 이미지(PNG) 파일로 다운로드됩니다.")
+        
+        # --- 데이터 처리 및 표 전송용 HTML 생성 ---
+        df_html_rows = ""
+        for i, subj in enumerate(selected_subjects):
+            diff = current_scores[i] - past_scores[i]
+            diff_str = f"+{diff}" if diff > 0 else str(diff)
+            diff_color = "#2e7d32" if diff >= 0 else "#c62828"
+            df_html_rows += f"""
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #fafafa; font-family: sans-serif;">{subj}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; font-family: sans-serif;">{past_scores[i]}점</td>
+                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A90E2; font-family: sans-serif;">{current_scores[i]}점</td>
+                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: {diff_color}; font-family: sans-serif;">{diff_str}</td>
+            </tr>
+            """
+
+        # --- 그래프 동적 생성 ---
+        fig_width = max(5, len(selected_subjects) * 1.5)
+        fig, ax = plt.subplots(figsize=(fig_width, 3.5))
+        x_indices = range(len(selected_subjects))
+        bar_width = 0.35
+        
+        rects1 = ax.bar([x - bar_width/2 for x in x_indices], past_scores, bar_width, label='지난달', color='#A0C4FF')
+        rects2 = ax.bar([x + bar_width/2 for x in x_indices], current_scores, bar_width, label='이번달', color='#FFADAD')
+        
+        ax.set_ylabel('점수 (점)')
+        ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10)
+        ax.set_xticks(x_indices)
+        short_labels = [s.split()[0] for s in selected_subjects]
+        ax.set_xticklabels(short_labels, fontsize=9)
+        ax.set_ylim(0, 110)
+        ax.legend()
+        ax.grid(axis='y', linestyle='--', alpha=0.5)
+        ax.bar_label(rects1, padding=3)
+        ax.bar_label(rects2, padding=3)
+        plt.tight_layout()
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=150)
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close()
+
+        # --- HTML 템플릿 출력 ---
+        html_layout = f"""
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+        <div style="margin-bottom: 20px;">
+            <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
+                📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
+            </button>
+        </div>
+
+        <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
+            
+            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                {logo_html}
+                <div style="text-align: left;">
+                    <h1 style="color:white; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
+                    <p style="color:white; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
+                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>과정/학년:</b> {student_level}</div>
+                <div><b>평가월:</b> {evaluation_month}</div>
+            </div>
+            <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
+            
+            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+            
+            <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
+                <thead>
+                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #4A90E2; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">변화량</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {df_html_rows}
+                </tbody>
+            </table>
+            
+            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+            
+            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
+            <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #2b5797;">
+                {teacher_feedback.replace('\n', '<br>')}
+            </div>
+        </div>
+
+        <script>
+        function takeScreenshot() {{
+            const element = document.getElementById("capture-area");
+            html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
+                const link = document.createElement('a');
+                link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }});
+        }}
+        </script>
+        """
+
+        components.html(html_layout, height=970, scrolling=True)
