@@ -122,7 +122,7 @@ else:
                     score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\n"
 
                 # [★수정 핵심★] 현재 원장님 서버망이 유일하게 에러 없이 100% 호출 가능한 공식 레거시 경로 모델 지정
-                model = genai.GenerativeModel('models/gemini-pro')
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt = f"""
                 너는 영어 전문 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
