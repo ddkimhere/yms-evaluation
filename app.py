@@ -102,7 +102,7 @@ else:
 
 st.markdown("---")
 
-# 4. 스마트 AI 피드백 문장 생성기 (만능 듀얼 모델 스위칭 엔진 탑재 🛠️)
+# 4. 스마트 AI 피드백 문장 생성기 (v1beta 레거시 완벽 호환 고정 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -133,26 +133,13 @@ else:
             4. 이모티콘은 적절히 1~2개만 섞어서 친근하게 작성해줘.
             """
             
-            # [핵심 로직 🛠️] 어떤 버전이 설치되어 있든 에러를 비껴가는 듀얼 모델 접속 시스템
-            success = False
-            # 순서 1: 가장 최신 규격 모델인 gemini-1.5-flash 시도
             try:
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # [수정포인트 🛠️] v1beta 구형 접속망이 유일하게 무조건 승인하는 공식 레거시 규격명 지정
+                model = genai.GenerativeModel('models/gemini-pro')
                 response = model.generate_content(prompt)
                 st.session_state["ai_comment"] = response.text
-                success = True
-            except:
-                pass
-            
-            # 순서 2: 실패 시 구버전 호환형인 gemini-pro 모델로 자동 전환 시도
-            if not success:
-                try:
-                    model = genai.GenerativeModel('gemini-pro')
-                    response = model.generate_content(prompt)
-                    st.session_state["ai_comment"] = response.text
-                    success = True
-                except Exception as e:
-                    st.error(f"AI 엔진 접속망 요류: {e}\n잠시 후 다시 시도해 주세요.")
+            except Exception as e:
+                st.error(f"AI 엔진 접속망 오류: {e}\n잠시 후 다시 시도해 주세요.")
 
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 AI가 문장을 자동으로 완성해 줍니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
