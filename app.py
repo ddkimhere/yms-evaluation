@@ -51,7 +51,7 @@ else:
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("구형 인프라 호환성 검증을 전면 통과한 실시간 AI 문장 창작 버전입니다.")
+st.caption("최신 구글 정식 gemini-1.5-flash AI 엔진이 탑재된 실시간 문장 창작 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -102,13 +102,13 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (구형 인프라 전용 완벽 대응 패치 🛠️)
+# 4. 실시간 AI 생각 가동망 구축 (gemini-1.5-flash 모델 최적화 세팅 🛠️)
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
 else:
-    st.success("🤖 구글 제미나이 AI 실시간 창작망이 활성화되었습니다.")
+    st.success("🤖 구글 제미나이 1.5 프리미엄 AI 가동 준비가 완료되었습니다.")
     
     custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
@@ -116,8 +116,8 @@ else:
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
         with st.spinner("AI가 단어들을 연결하여 정교한 5문장 코멘트를 지어내고 있습니다..."):
             try:
-                # [핵심 변경] v1beta 서버망이 유일하게 인식하는 정식 구형 모델 경로로 최종 고정
-                model = genai.GenerativeModel('models/gemini-pro')
+                # [★최신 모델 직결★] 원장님 계정 플랜에 맞춰 1.5 플래시 모델로 정확히 연동합니다.
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
@@ -191,4 +191,58 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         plt.close()
 
         html_layout = f"""
-        <script src="
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <div style="margin-bottom: 20px;">
+            <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
+                📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
+            </button>
+        </div>
+        <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
+            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                {logo_html}
+                <div style="text-align: left;">
+                    <h1 style="color:white; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
+                    <p style="color:white; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
+                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>과정/학년:</b> {student_level}</div>
+                <div><b>평가월:</b> {evaluation_month}</div>
+            </div>
+            <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
+            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
+                <thead>
+                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #4A90E2; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">변화량</td>
+                    </tr>
+                </thead>
+                <tbody>{df_html_rows}</tbody>
+            </table>
+            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
+            </div>
+            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
+            <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #2b5797;">
+                {teacher_feedback.replace('\n', '<br>')}
+            </div>
+        </div>
+        <script>
+        function takeScreenshot() {{
+            const element = document.getElementById("capture-area");
+            html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
+                const link = document.createElement('a');
+                link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }});
+        }}
+        </script>
+        """
+        components.html(html_layout, height=970, scrolling=True)
