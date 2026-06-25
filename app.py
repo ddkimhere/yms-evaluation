@@ -38,7 +38,7 @@ if os.path.exists("logo.jpg"):
         encoded_logo = base64.b64encode(image_file.read()).decode()
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
-# --- [AI 구글 API 연동 설정 - 공백 청소 포함] ---
+# --- [AI 구글 API 연동 설정] ---
 if "GEMINI_API_KEY" in st.secrets:
     raw_key = st.secrets["GEMINI_API_KEY"]
     clean_key = raw_key.strip().replace('"', '').replace("'", "")
@@ -120,8 +120,8 @@ else:
                 for idx, subj in enumerate(selected_subjects):
                     score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
 
-                # [★마지막 404 해결 쐐기★] v1beta 구형 접속망 전용 공식 레거시 규격명 지정
-                model = genai.GenerativeModel('models/gemini-pro')
+                # v1beta 구형 접속망 망에서 에러가 나지 않도록 접두사를 명확히 뺀 정식 명칭 지정
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt = f"""
                 너는 영어 전문 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
