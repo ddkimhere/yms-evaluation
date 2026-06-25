@@ -39,7 +39,6 @@ if os.path.exists("logo.jpg"):
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
 
 # --- [AI 구글 Gemini API 연동 설정] ---
-# Streamlit Secrets에 저장된 API 키를 안전하게 불러옵니다.
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
     ai_available = True
@@ -101,7 +100,7 @@ else:
 
 st.markdown("---")
 
-# --- [핵심 기능] 4. 스마트 AI 피드백 문장 생성기 ---
+# 4. 스마트 AI 피드백 문장 생성기
 st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
@@ -112,11 +111,12 @@ else:
     custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력 (예: 독해 지문 이해 잘함, 태도 우수)", value="to부정사 동명사 파트 어려운데 이해 잘함")
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력 (예: 과제 꼼꼼함 부족, 집중력)", value="과제 성실도 떨어짐")
     
-    # AI에게 보낼 안내 규칙(프롬프트) 설정
+    # AI 구동 버튼
     if st.button("🤖 AI에게 5~10문장 명품 의견 추천받기", type="secondary"):
         with st.spinner("AI가 학부모님용 명품 피드백을 정성스럽게 작성하고 있습니다..."):
             try:
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                # [수정 포인트 🛠️] 최신 모델 지원 서식인 gemini-1.5-flash-latest 로 변경
+                model = genai.GenerativeModel("gemini-1.5-flash-latest")
                 prompt = f"""
                 너는 프리미엄 영어 학원인 'YMS 영어학원'의 전문적이고 따뜻한 원장 선생님이야.
                 아래 정보를 바탕으로 학부모님께 카카오톡으로 보낼 '월말 성취도 평가 종합 의견'을 정중하고 신뢰감 넘치는 어조(~합니다 체)로 작성해줘.
@@ -138,7 +138,6 @@ else:
             except Exception as e:
                 st.error(f"AI 호출 중 오류가 발생했습니다: {e}")
 
-    # 생성된 결과를 텍스트 박스에 자동 바인딩 (수정 가능)
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 AI가 문장을 자동으로 완성해 줍니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
