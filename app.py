@@ -9,6 +9,15 @@ import os
 import urllib.request
 import google.generativeai as genai
 
+# ==========================================
+# 🎨 [원장님 전용] 학원 로고 색상 1초 세팅존
+# ==========================================
+# 학원 로고의 메인 포인트 색상(16진수 HEX 코드)을 여기에 적어주세요.
+LOGO_COLOR = "#1A365D"  
+# 연한 배경용 (종합의견 박스 등에 쓰일 연한 로고 톤 배경색)
+LOGO_LIGHT_BG = "#F0F4F8" 
+# ==========================================
+
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
 @st.cache_resource
 def load_korean_font():
@@ -47,8 +56,26 @@ if "GEMINI_API_KEY" in st.secrets:
 else:
     ai_available = False
 
-# 웹페이지 기본 설정
+# 웹페이지 기본 설정 및 로고 테마 색상 강제 매칭 디자인 주입
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
+
+st.markdown(f"""
+    <style>
+    div.stButton > button:first-child {{
+        background-color: {LOGO_COLOR} !important;
+        color: white !important;
+        border-radius: 6px;
+        border: none;
+    }}
+    div.stButton > button:first-child:hover {{
+        background-color: #333333 !important;
+        color: white !important;
+    }}
+    h1, h2, h3 {{
+        color: {LOGO_COLOR} !important;
+    }}
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("📝 YMS English Monthly Test 생성기")
 st.caption("지난달 대비 성적 변화 추이를 AI가 스스로 분석하여 리포트를 창작하는 정식 버전입니다.")
@@ -102,8 +129,8 @@ else:
 
 st.markdown("---")
 
-# 4. 실시간 AI 생각 가동망 구축 (v1beta 레거시 완벽 호환 고정 🛠️)
-st.subheader("✍️ 4. AI 명품 종합 의견 생성")
+# 4. 실시간 AI 생각 가동망 구축 및 실시간 미리보기 통합
+st.subheader("✍️ 4. AI 명품 종합 의견 생성 및 실시간 미리보기")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
@@ -120,7 +147,6 @@ else:
                 for idx, subj in enumerate(selected_subjects):
                     score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
 
-                # v1beta 구형 접속망 망에서 에러가 나지 않도록 접두사를 명확히 뺀 정식 명칭 지정
                 model = genai.GenerativeModel('gemini-2.5-flash')
                 
                 prompt = f"""
@@ -153,12 +179,58 @@ else:
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 점수 추이를 분석한 진짜 AI 코멘트가 자동으로 창작됩니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
+    # 🌟 [원장님 요청사항] 종합의견 란 바로 하단에 실시간 인라인 미리보기 구축
+    if selected_subjects and "ai_comment" in st.session_state:
+        st.markdown("#### 👁️ 결과지 실시간 미리보기")
+        
+        # 미리보기용 소형 차트 빌드 (색감 반영)
+        fig_pre, ax_pre = plt.subplots(figsize=(4.5, 2.2))
+        x_indices_pre = range(len(selected_subjects))
+        ax_pre.bar([x - 0.17 for x in x_indices_pre], past_scores, 0.35, label='지난달', color='#B0C4DE')
+        ax_pre.bar([x + 0.17 for x in x_indices_pre], current_scores, 0.35, label='이번달', color=LOGO_COLOR)
+        ax_pre.set_xticks(x_indices_pre)
+        ax_pre.set_xticklabels([s.split()[0] for s in selected_subjects], fontsize=8)
+        ax_pre.set_ylim(0, 110)
+        ax_pre.legend(fontsize=7)
+        ax_pre.grid(axis='y', linestyle='--', alpha=0.3)
+        plt.tight_layout()
+        
+        buf_pre = io.BytesIO()
+        plt.savefig(buf_pre, format='png', dpi=110)
+        buf_pre.seek(0)
+        img_pre_base64 = base64.b64encode(buf_pre.read()).decode('utf-8')
+        plt.close()
+        
+        preview_rows = ""
+        for i, subj in enumerate(selected_subjects):
+            diff = current_scores[i] - past_scores[i]
+            diff_str = f"+{diff}" if diff > 0 else str(diff)
+            preview_rows += f"<tr><td style='padding:5px; border:1px solid #ddd; font-weight:bold;'>{subj.split()[0]}</td><td style='padding:5px; border:1px solid #ddd;'>{past_scores[i]}점</td><td style='padding:5px; border:1px solid #ddd; font-weight:bold; color:{LOGO_COLOR};'>{current_scores[i]}점</td><td style='padding:5px; border:1px solid #ddd;'>{diff_str}</td></tr>"
+            
+        preview_html = f"""
+        <div style="padding:15px; background:#ffffff; border:2px solid {LOGO_COLOR}; border-radius:8px; font-family:sans-serif; color:#333; font-size:12px; max-width:650px; margin:0 auto;">
+            <div style="background-color:{LOGO_COLOR}; padding:12px; border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+                <div style="color:white; font-size:16px; font-weight:bold;">YMS English Monthly Test (미리보기)</div>
+            </div>
+            <p style="margin:5px 0;"><b>이름:</b> {student_name} &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b> {student_level} &nbsp;&nbsp;|&nbsp;&nbsp; <b>평가월:</b> {evaluation_month}</p>
+            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11px; margin-top:8px; margin-bottom:12px;">
+                <tr style="background:#f2f2f2; font-weight:bold;"><td style="padding:5px; border:1px solid #ddd;">평가 영역</td><td style="padding:5px; border:1px solid #ddd;">지난달</td><td style="padding:5px; border:1px solid #ddd;">이번달</td><td style="padding:5px; border:1px solid #ddd;">변화</td></tr>
+                {preview_rows}
+            </table>
+            <div style="text-align:center; margin-bottom:12px;"><img src="data:image/png;base64,{img_pre_base64}" style="width:75%; height:auto;" /></div>
+            <div style="background-color:{LOGO_LIGHT_BG}; border-left:4px solid {LOGO_COLOR}; padding:12px; border-radius:4px; font-size:12px; line-height:1.5; text-align:left; color:#111;">
+                {teacher_feedback.replace('\n', '<br>')}
+            </div>
+        </div>
+        """
+        components.html(preview_html, height=430, scrolling=True)
+
 st.markdown("---")
 
 # 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
     if not selected_subjects:
-        st.error("평가 영역이 선택되지 않았습니다.")
+        st.error("평가 영역이 선택되지었습니다.")
     else:
         st.subheader("📋 5. 생성된 결과지 확인 및 이미지 저장")
         
@@ -171,7 +243,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             <tr style="border-bottom: 1px solid #ddd;">
                 <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #fafafa; font-family: sans-serif;">{subj}</td>
                 <td style="padding: 10px; border: 1px solid #ddd; font-family: sans-serif;">{past_scores[i]}점</td>
-                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A90E2; font-family: sans-serif;">{current_scores[i]}점</td>
+                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: {LOGO_COLOR}; font-family: sans-serif;">{current_scores[i]}점</td>
                 <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: {diff_color}; font-family: sans-serif;">{diff_str}</td>
             </tr>
             """
@@ -180,10 +252,10 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         fig, ax = plt.subplots(figsize=(fig_width, 3.5))
         x_indices = range(len(selected_subjects))
         bar_width = 0.35
-        rects1 = ax.bar([x - bar_width/2 for x in x_indices], past_scores, bar_width, label='지난달', color='#A0C4FF')
-        rects2 = ax.bar([x + bar_width/2 for x in x_indices], current_scores, bar_width, label='이번달', color='#FFADAD')
+        rects1 = ax.bar([x - bar_width/2 for x in x_indices], past_scores, bar_width, label='지난달', color='#B0C4DE')
+        rects2 = ax.bar([x + bar_width/2 for x in x_indices], current_scores, bar_width, label='이번달', color=LOGO_COLOR)
         ax.set_ylabel('점수 (점)')
-        ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10)
+        ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10, color=LOGO_COLOR)
         ax.set_xticks(x_indices)
         short_labels = [s.split()[0] for s in selected_subjects]
         ax.set_xticklabels(short_labels, fontsize=9)
@@ -203,16 +275,16 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         html_layout = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <div style="margin-bottom: 20px;">
-            <button onclick="takeScreenshot()" style="background-color: #4A90E2; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
+            <button onclick="takeScreenshot()" style="background-color: {LOGO_COLOR}; color: white; border: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.15); font-family: sans-serif;">
                 📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
             </button>
         </div>
         <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
-            <div style="background-color:#4A90E2; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <div style="background-color:{LOGO_COLOR}; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                 {logo_html}
                 <div style="text-align: left;">
-                    <h1 style="color:white; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
-                    <p style="color:white; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
+                    <h1 style="color:white !important; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
+                    <p style="color:white !important; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
@@ -221,10 +293,10 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             </div>
             <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
             <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="margin-top: 0; font-size: 16px; color: #111; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
+            <h3 style="margin-top: 0; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
             <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
                 <thead>
-                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #4A90E2; border-bottom: 1px solid #ddd;">
+                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid {LOGO_COLOR}; border-bottom: 1px solid #ddd;">
                         <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
                         <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
                         <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
@@ -233,13 +305,13 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                 </thead>
                 <tbody>{df_html_rows}</tbody>
             </table>
-            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
+            <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
             <div style="text-align: center; margin-bottom: 25px;">
                 <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
             </div>
             <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="font-size: 16px; color: #111; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
-            <div style="background-color: #e8f4fd; border-left: 5px solid #4A90E2; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #2b5797;">
+            <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
+            <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #111111;">
                 {teacher_feedback.replace('\n', '<br>')}
             </div>
         </div>
