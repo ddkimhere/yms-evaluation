@@ -9,10 +9,11 @@ import os
 import urllib.request
 
 # ==========================================
-# 🎨 [원장님 전용] 학원 로고 색상 1초 세팅존
+# 🎨 [원장님 전용] 학원 로고 및 테마 색상 세팅존
 # ==========================================
-LOGO_COLOR = "#1A365D"  
-LOGO_LIGHT_BG = "#F0F4F8" 
+# 보내주신 이미지의 깊이감 있는 시그니처 네이비 색상으로 정밀 세팅했습니다.
+LOGO_COLOR = "#1A3263"  
+LOGO_LIGHT_BG = "#F4F6F9" 
 # ==========================================
 
 # --- [서버용 한글 폰트 강제 다운로드 및 설정] ---
@@ -37,13 +38,6 @@ def load_korean_font():
 
 load_korean_font()
 
-# --- [로고 이미지 로드] ---
-logo_html = ""
-if os.path.exists("logo.jpg"):
-    with open("logo.jpg", "rb") as image_file:
-        encoded_logo = base64.b64encode(image_file.read()).decode()
-    logo_html = f'<img src="data:image/jpeg;base64,{encoded_logo}" style="width:75px; height:75px; border-radius:50%; margin-right:15px; border:2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
-
 # 웹페이지 기본 설정 및 로고 테마 색상 강제 매칭 디자인 주입
 st.set_page_config(page_title="YMS English Monthly Test", layout="centered")
 
@@ -66,7 +60,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 st.title("📝 YMS English Monthly Test 생성기")
-st.caption("구글 트래픽 제한과 관계없이 0.1초 만에 무제한으로 리포트를 창작하는 무결점 버전입니다.")
+st.caption("수학 진단평가 레이아웃을 기반으로 새롭게 리뉴얼된 영어과 정식 버전입니다.")
 st.markdown("---")
 
 # 1. 학생 기본 정보 입력
@@ -74,7 +68,7 @@ st.subheader("👤 1. 학생 기본 정보")
 col1, col2 = st.columns(2)
 with col1:
     student_name = st.text_input("학생 이름", value="김YMS")
-    evaluation_month = st.selectbox("평가월", ["6월", "7월", "8월", "9월", "10월", "11월", "12월"])
+    evaluation_month = st.selectbox("평가월", ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"], index=5)
 with col2:
     current_book = st.text_input("현재 교재", value="English Stars Level 2")
     school_type = st.radio("과정 선택", ["초등부", "중등부"], horizontal=True)
@@ -118,7 +112,8 @@ else:
 st.markdown("---")
 
 # 4. 실시간 무제한 고품격 문장 엔진 및 실시간 미리보기 통합
-st.subheader("✍️ 4. AI 명품 종합 의견 생성 및 실시간 미리보기")
+st.subheader("✍ "
+             "4. AI 명품 종합 의견 생성 및 실시간 미리보기")
 st.success("🤖 트래픽 초과 장애 우려 없이 즉시 완벽한 5줄 피드백을 창작하는 독자 엔진 구동 중입니다.")
 
 custom_pos = st.text_input("👍 이번 달 학생의 칭찬/강점 키워드 입력", value="문법 점수가 많이 오름")
@@ -128,12 +123,10 @@ if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="second
     pos_raw = custom_pos.strip()
     neg_raw = custom_neg.strip()
     
-    # 성적 지표 연동 분석 자동화 계산
     avg_past = sum(past_scores) / len(past_scores) if past_scores else 0
     avg_curr = sum(current_scores) / len(current_scores) if current_scores else 0
     score_diff = avg_curr - avg_past
     
-    # [GPT 최적화 프롬프트 조건 반영 로컬 가공망]
     if score_diff > 4:
         opening = f"이번 {evaluation_month} 학업 성취도 평가에서 지난 기간 동안 쌓아온 탄탄한 성실함이 실력 향상으로 명확히 드러났습니다."
         pos_processed = f"특히 자기주도적으로 오답을 보완하려는 태도가 빛을 발하며 실제 '{pos_raw}' 지점의 눈부신 도약으로 직접 연결되었습니다."
@@ -153,7 +146,6 @@ if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="second
         neg_processed = f"다만 완벽한 오답 제로 상태에 도달하기 위해서는 디테일한 예습 과정 속에서 '{neg_raw}' 보완 사항을 차분히 챙기는 연습이 수반되어야 합니다."
         closing = f"발견된 보완점을 보다 세심하게 케어하여 다음 달에는 실력이 더욱 눈부시게 폭발할 수 있도록 온 힘을 다해 지도하겠습니다."
 
-    # 원장님의 프롬프트 조건 완벽 가공 (숫자 소거, 5문장 줄글, 이모티콘 삭제, 학원명 남발 제한, 짧은 문장화)
     text_blocks = [
         f"{opening} ",
         f"{pos_processed} ",
@@ -161,13 +153,12 @@ if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="second
         f"{neg_processed} ",
         f"{closing}"
     ]
-    
     st.session_state["ai_comment"] = "".join(text_blocks)
 
 default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 점수 추이를 분석한 진짜 AI 코멘트가 자동으로 창작됩니다.")
 teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
-# 🌟 실시간 인라인 미리보기 구축
+# --- [실시간 미리보기 HTML 레이아웃 (수학 헤더 반영)] ---
 if selected_subjects and "ai_comment" in st.session_state:
     st.markdown("#### 👁️ 결과지 실시간 미리보기")
     
@@ -195,22 +186,40 @@ if selected_subjects and "ai_comment" in st.session_state:
         preview_rows += f"<tr><td style='padding:5px; border:1px solid #ddd; font-weight:bold;'>{subj.split()[0]}</td><td style='padding:5px; border:1px solid #ddd;'>{past_scores[i]}점</td><td style='padding:5px; border:1px solid #ddd; font-weight:bold; color:{LOGO_COLOR};'>{current_scores[i]}점</td><td style='padding:5px; border:1px solid #ddd;'>{diff_str}</td></tr>"
         
     preview_html = f"""
-    <div style="padding:15px; background:#ffffff; border:2px solid {LOGO_COLOR}; border-radius:8px; font-family:sans-serif; color:#333; font-size:12px; max-width:650px; margin:0 auto;">
-        <div style="background-color:{LOGO_COLOR}; padding:12px; border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
-            <div style="color:white; font-size:16px; font-weight:bold;">YMS English Monthly Test (미리보기)</div>
+    <div style="padding:25px; background:{LOGO_COLOR}; border-radius:8px; font-family:sans-serif; color:white; max-width:650px; margin:0 auto; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:15px;">
+            <div style="display:flex; align-items:center;">
+                <div style="width:52px; height:52px; background:white; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-right:12px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                    <span style="color:{LOGO_COLOR}; font-weight:900; font-size:16px; letter-spacing:-0.5px;">YMS</span>
+                </div>
+                <div style="text-align:left;">
+                    <div style="font-size:18px; font-weight:bold; letter-spacing:0.5px; color:white;">와이엠에스 영어과</div>
+                    <div style="font-size:10px; font-weight:bold; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px;">YMS ENGLISH · 부송관</div>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:12px; font-weight:bold; color:#E5A93C; letter-spacing:0.5px;">Your Mastery Solution</div>
+                <div style="font-size:9px; color:rgba(255,255,255,0.7); margin-top:3px; font-style:italic; font-family:serif;">True learning builds the bridge from effort to excellence.</div>
+            </div>
         </div>
-        <p style="margin:5px 0;"><b>이름:</b> {student_name} &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b> {student_level} &nbsp;&nbsp;|&nbsp;&nbsp; <b>평가월:</b> {evaluation_month}</p>
-        <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11px; margin-top:8px; margin-bottom:12px;">
-            <tr style="background:#f2f2f2; font-weight:bold;"><td style="padding:5px; border:1px solid #ddd;">평가 영역</td><td style="padding:5px; border:1px solid #ddd;">지난달</td><td style="padding:5px; border:1px solid #ddd;">이번달</td><td style="padding:5px; border:1px solid #ddd;">변화</td></tr>
-            {preview_rows}
-        </table>
-        <div style="text-align:center; margin-bottom:12px;"><img src="data:image/png;base64,{img_pre_base64}" style="width:75%; height:auto;" /></div>
-        <div style="background-color:{LOGO_LIGHT_BG}; border-left:4px solid {LOGO_COLOR}; padding:12px; border-radius:4px; font-size:12px; line-height:1.5; text-align:left; color:#111;">
-            {teacher_feedback.replace('\n', '<br>')}
+        
+        <div style="font-size:22px; font-weight:bold; text-align:left; margin-bottom:5px; color:white; letter-spacing:1px;">YMS Monthly Test Report</div>
+        <div style="font-size:12px; color:rgba(255,255,255,0.8); text-align:left; margin-bottom:20px;">2026년 {evaluation_month} 정기 평가 · {current_book}</div>
+        
+        <div style="background:white; border-radius:6px; padding:15px; color:#333;">
+            <p style="margin:0 0 10px 0; font-size:12px;"><b>이름:</b> {student_name} &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b> {student_level}</p>
+            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11px; margin-bottom:12px;">
+                <tr style="background:#f8f9fa; font-weight:bold;"><td style="padding:5px; border:1px solid #ddd;">평가 영역</td><td style="padding:5px; border:1px solid #ddd;">지난달</td><td style="padding:5px; border:1px solid #ddd;">이번달</td><td style="padding:5px; border:1px solid #ddd;">변화</td></tr>
+                {preview_rows}
+            </table>
+            <div style="text-align:center; margin-bottom:12px;"><img src="data:image/png;base64,{img_pre_base64}" style="width:75%; height:auto;" /></div>
+            <div style="background-color:{LOGO_LIGHT_BG}; border-left:4px solid {LOGO_COLOR}; padding:12px; border-radius:4px; font-size:11px; line-height:1.5; color:#111;">
+                {teacher_feedback.replace('\n', '<br>')}
+            </div>
         </div>
     </div>
     """
-    components.html(preview_html, height=430, scrolling=True)
+    components.html(preview_html, height=520, scrolling=True)
 
 st.markdown("---")
 
@@ -266,40 +275,53 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                 📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
             </button>
         </div>
-        <div id="capture-area" style="padding: 25px; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; font-family: sans-serif; color: #333333;">
-            <div style="background-color:{LOGO_COLOR}; padding:15px; border-radius:10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                {logo_html}
-                <div style="text-align: left;">
-                    <h1 style="color:white !important; margin:0; font-size: 26px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">YMS English Monthly Test</h1>
-                    <p style="color:white !important; margin:4px 0 0 0; font-size: 14px; font-family: sans-serif; opacity: 0.9;">{school_type} 학업 성취도 리포트</p>
+        <div id="capture-area" style="padding: 30px; background-color: {LOGO_COLOR}; border-radius: 8px; font-family: sans-serif; color: white;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px;">
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 55px; height: 55px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <span style="color: {LOGO_COLOR}; font-weight: 900; font-size: 18px; letter-spacing: -0.5px;">YMS</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <h1 style="color: white !important; margin: 0; font-size: 22px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">와이엠에스 영어과</h1>
+                        <p style="color: rgba(255,255,255,0.6) !important; margin: 2px 0 0 0; font-size: 11px; font-family: sans-serif; font-weight: bold; letter-spacing: 1px;">YMS ENGLISH · 부송관</p>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; font-weight: bold; color: #E5A93C; letter-spacing: 0.5px;">Your Mastery Solution</div>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 4px; font-style: italic; font-family: serif;">True learning builds the bridge from effort to excellence.</div>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-family: sans-serif;">
-                <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> {student_level}</div>
-                <div><b>평가월:</b> {evaluation_month}</div>
-            </div>
-            <div style="font-size: 14px; margin-bottom: 20px; font-family: sans-serif;"><b>현재 사용 교재:</b> {current_book}</div>
-            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="margin-top: 0; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
-            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
-                <thead>
-                    <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid {LOGO_COLOR}; border-bottom: 1px solid #ddd;">
-                        <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">변화량</td>
-                    </tr>
-                </thead>
-                <tbody>{df_html_rows}</tbody>
-            </table>
-            <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
-            <div style="text-align: center; margin-bottom: 25px;">
-                <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
-            </div>
-            <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
-            <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
-            <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #111111;">
-                {teacher_feedback.replace('\n', '<br>')}
+            
+            <div style="font-size: 26px; font-weight: bold; text-align: left; margin-bottom: 5px; color: white; letter-spacing: 1px;">YMS Monthly Test Report</div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.8); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가 · {current_book}</div>
+            
+            <div style="background: white; border-radius: 6px; padding: 25px; color: #333333;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-family: sans-serif;">
+                    <div><b>이름:</b> {student_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> {student_level}</div>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif;">📈 영역별 성취 레벨</h3>
+                <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 25px; font-family: sans-serif;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid {LOGO_COLOR}; border-bottom: 1px solid #ddd;">
+                            <td style="padding: 10px; border: 1px solid #ddd;">평가 영역</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">지난달 점수</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">이번달 점수</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">변화량</td>
+                        </tr>
+                    </thead>
+                    <tbody>{df_html_rows}</tbody>
+                </table>
+                <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">📊 지난달 대비 성적 추이</h3>
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
+                </div>
+                <hr style="border: 0; border-top: 1px solid #eeeeee; margin-bottom: 20px;">
+                <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 10px; font-family: sans-serif;">💌 선생님 종합 의견</h3>
+                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 15px; border-radius: 4px; font-size: 13px; line-height: 1.6; text-align: left; font-family: sans-serif; color: #111111;">
+                    {teacher_feedback.replace('\n', '<br>')}
+                </div>
             </div>
         </div>
         <script>
@@ -314,4 +336,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         }}
         </script>
         """
-        components.html(html_layout, height=970, scrolling=True)
+        components.html(html_layout, height=1050, scrolling=True)
