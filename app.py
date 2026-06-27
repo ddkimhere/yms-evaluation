@@ -184,77 +184,7 @@ else:
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 점수 추이를 분석한 진짜 AI 코멘트가 자동으로 창작됩니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
-# --- [실시간 미리보기 HTML 레이아웃] ---
-if selected_subjects and "ai_comment" in st.session_state:
-    st.markdown("#### 👁️ 결과지 실시간 미리보기")
-    
-    fig_pre, ax_pre = plt.subplots(figsize=(4.5, 2.2))
-    x_indices_pre = range(len(selected_subjects))
-    ax_pre.bar([x - 0.17 for x in x_indices_pre], past_scores, 0.35, label='지난달', color='#B0C4DE')
-    ax_pre.bar([x + 0.17 for x in x_indices_pre], current_scores, 0.35, label='이번달', color=LOGO_COLOR)
-    ax_pre.set_xticks(x_indices_pre)
-    ax_pre.set_xticklabels([s.split()[0] for s in selected_subjects], fontsize=8)
-    ax_pre.set_ylim(0, 110)
-    ax_pre.legend(fontsize=7)
-    ax_pre.grid(axis='y', linestyle='--', alpha=0.3)
-    plt.tight_layout()
-    
-    buf_pre = io.BytesIO()
-    plt.savefig(buf_pre, format='png', dpi=110)
-    buf_pre.seek(0)
-    img_pre_base64 = base64.b64encode(buf_pre.read()).decode('utf-8')
-    plt.close()
-    
-    preview_rows = ""
-    for i, subj in enumerate(selected_subjects):
-        diff = current_scores[i] - past_scores[i]
-        diff_str = f"+{diff}" if diff > 0 else str(diff)
-        diff_color = "#e53935" if diff < 0 else ("#1e88e5" if diff > 0 else "#333333")
-        preview_rows += f"""
-        <tr style='border-bottom:1px solid #f1f1f1;'>
-            <td style='padding:8px 10px; border-right:1px solid #f1f1f1; font-weight:600; color:#333;'>{subj.split()[0]}</td>
-            <td style='padding:8px 10px; border-right:1px solid #f1f1f1; color:#666;'>{past_scores[i]}점</td>
-            <td style='padding:8px 10px; border-right:1px solid #f1f1f1; font-weight:700; color:{LOGO_COLOR};'>{current_scores[i]}점</td>
-            <td style='padding:8px 10px; font-weight:700; color:{diff_color};'>{diff_str}</td>
-        </tr>"""
-        
-    preview_html = f"""
-    <div style="padding:30px; background:{LOGO_COLOR}; border-radius:12px; font-family:'Malgun Gothic', sans-serif; color:white; max-width:650px; margin:0 auto; box-shadow:0 6px 16px rgba(0,0,0,0.15);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:15px;">
-            <div style="display:flex; align-items:center;">
-                <div style="width:52px; height:52px; background:white; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-right:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                    <span style="color:{LOGO_COLOR}; font-weight:900; font-size:16px; letter-spacing:-0.5px;">YMS</span>
-                </div>
-                <div style="text-align:left;">
-                    <div style="font-size:19px; font-weight:bold; letter-spacing:0.5px; color:white;">와이엠에스 영어과</div>
-                    <div style="font-size:10px; font-weight:bold; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px;">YMS ENGLISH </div>
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-size:12px; font-weight:bold; color:#E5A93C; letter-spacing:0.5px;">Your Mastery Solution</div>
-                <div style="font-size:9px; color:rgba(255,255,255,0.7); margin-top:3px; font-style:italic; font-family:serif;">True learning builds the bridge from effort to excellence.</div>
-            </div>
-        </div>
-        
-        <div style="font-size:24px; font-weight:bold; text-align:left; margin-bottom:5px; color:white; letter-spacing:0.5px;">YMS Monthly Test Report</div>
-        <div style="font-size:12px; color:rgba(255,255,255,0.75); text-align:left; margin-bottom:20px;">2026년 {evaluation_month} 정기 평가 </div>
-        
-        <div style="background:white; border-radius:8px; padding:20px; color:#333; box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
-            <p style="margin:0 0 15px 0; font-size:13px; color:#444; background:#f8f9fa; padding:8px 12px; border-radius:6px;"><b>이름:</b> <span style="color:#111;">{student_name}</span> &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b>  <span style="color:#111;">{student_level}</span></p>
-            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:12px; margin-top:8px; margin-bottom:15px; border:1px solid #eaeaea;">
-                <tr style="background:#f8f9fa; font-weight:bold; color:#555; border-bottom:1px solid #eaeaea;"><td style="padding:8px; width:25%;">평가 영역</td><td style="padding:8px;">지난달</td><td style="padding:8px;">이번달</td><td style="padding:8px;">변화</td></tr>
-                {preview_rows}
-            </table>
-            <div style="text-align:center; margin-bottom:15px;"><img src="data:image/png;base64,{img_pre_base64}" style="width:80%; height:auto;" /></div>
-            <div style="background-color:{LOGO_LIGHT_BG}; border-left:4px solid {LOGO_COLOR}; padding:14px; border-radius:6px; font-size:12.5px; line-height:1.6; color:#222; text-align:left; font-family:sans-serif;">
-                {teacher_feedback.replace('\n', '<br>')}
-            </div>
-        </div>
-    </div>
-    """
-    components.html(preview_html, height=540, scrolling=True)
 
-st.markdown("---")
 
 # 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
@@ -327,11 +257,15 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             </div>
             
             <div style="font-size: 28px; font-weight: bold; text-align: left; margin-bottom: 5px; color: white; letter-spacing: 0.5px;">YMS Monthly Test Report</div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가 · {current_book}</div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가</div>
             
             <div style="background: white; border-radius: 8px; padding: 30px; color: #333333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14.5px; font-family: sans-serif; background:#f8f9fa; padding:10px 15px; border-radius:6px; color:#444;">
-                    <div><b>이름:</b> <span style="color:#111; font-weight:600;">{student_name}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> <span style="color:#111; font-weight:600;">{student_level}</span></div>
+                    <div>
+                        <b>이름:</b> <span style="color:#111; font-weight:600;">{student_name}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                        <b>학년:</b> <span style="color:#111; font-weight:600;">{student_level}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                        <b>교재:</b> <span style="color:#111; font-weight:600;">{current_book}</span>
+                    </div>
                 </div>
                 <h3 style="margin-top: 25px; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px; margin-bottom: 12px;">📈 영역별 성취 레벨</h3>
                 <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 30px; font-family: sans-serif; border: 1px solid #eaeaea;">
@@ -361,7 +295,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
                 const link = document.createElement('a');
                 link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
-                link.href = canvas.toDataURL('image/png');
+                link.href = canvas.toToDataURL('image/png');
                 link.click();
             }});
         }}
