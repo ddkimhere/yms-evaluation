@@ -227,7 +227,7 @@ if selected_subjects and "ai_comment" in st.session_state:
                 </div>
                 <div style="text-align:left;">
                     <div style="font-size:19px; font-weight:bold; letter-spacing:0.5px; color:white;">와이엠에스 영어과</div>
-                    <div style="font-size:10px; font-weight:bold; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px;">YMS ENGLISH · 부송관</div>
+                    <div style="font-size:10px; font-weight:bold; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px;">YMS ENGLISH </div>
                 </div>
             </div>
             <div style="text-align:right;">
@@ -237,10 +237,10 @@ if selected_subjects and "ai_comment" in st.session_state:
         </div>
         
         <div style="font-size:24px; font-weight:bold; text-align:left; margin-bottom:5px; color:white; letter-spacing:0.5px;">YMS Monthly Test Report</div>
-        <div style="font-size:12px; color:rgba(255,255,255,0.75); text-align:left; margin-bottom:20px;">2026년 {evaluation_month} 정기 평가 · {current_book}</div>
+        <div style="font-size:12px; color:rgba(255,255,255,0.75); text-align:left; margin-bottom:20px;">2026년 {evaluation_month} 정기 평가 </div>
         
         <div style="background:white; border-radius:8px; padding:20px; color:#333; box-shadow:inset 0 2px 4px rgba(0,0,0,0.05);">
-            <p style="margin:0 0 15px 0; font-size:13px; color:#444; background:#f8f9fa; padding:8px 12px; border-radius:6px;"><b>이름:</b> <span style="color:#111;">{student_name}</span> &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b> <span style="color:#111;">{student_level}</span></p>
+            <p style="margin:0 0 15px 0; font-size:13px; color:#444; background:#f8f9fa; padding:8px 12px; border-radius:6px;"><b>이름:</b> <span style="color:#111;">{student_name}</span> &nbsp;&nbsp;|&nbsp;&nbsp; <b>학년:</b>  <span style="color:#111;">{student_level}</span></p>
             <table style="width:100%; border-collapse:collapse; text-align:center; font-size:12px; margin-top:8px; margin-bottom:15px; border:1px solid #eaeaea;">
                 <tr style="background:#f8f9fa; font-weight:bold; color:#555; border-bottom:1px solid #eaeaea;"><td style="padding:8px; width:25%;">평가 영역</td><td style="padding:8px;">지난달</td><td style="padding:8px;">이번달</td><td style="padding:8px;">변화</td></tr>
                 {preview_rows}
