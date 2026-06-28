@@ -146,8 +146,4 @@ else:
     custom_neg = st.text_input("🌱 이번 달 학생의 보완/노력 키워드 입력", value="수업 집중도 주춤함")
     
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
-        with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성하고 있습니다..."):
-            try:
-                score_summary = ""
-                for idx, subj in enumerate(selected_subjects):
-                    score_summary += f"-
+        with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성
