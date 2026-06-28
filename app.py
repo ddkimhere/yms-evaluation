@@ -247,7 +247,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                     </div>
                     <div style="text-align: left;">
                         <h1 style="color: white !important; margin: 0; font-size: 23px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">와이엠에스 영어과</h1>
-                        <p style="color: rgba(255,255,255,0.6) !important; margin: 2px 0 0 0; font-size: 11px; font-family: sans-serif; font-weight: bold; letter-spacing: 1px;">YMS ENGLISH · 부송관</p>
+                        <p style="color: rgba(255,255,255,0.6) !important; margin: 2px 0 0 0; font-size: 11px; font-family: sans-serif; font-weight: bold; letter-spacing: 1px;">YMS ENGLISH </p>
                     </div>
                 </div>
                 <div style="text-align: right;">
