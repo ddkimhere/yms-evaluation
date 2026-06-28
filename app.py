@@ -64,15 +64,15 @@ st.markdown(f"""
         color: white !important;
         border-radius: 8px;
         border: none;
-        padding: 0.5rem 1.5rem;
+        padding: 0.6rem 1.8rem;
         font-weight: 600;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         transition: all 0.2s ease;
     }}
     div.stButton > button:first-child:hover {{
         background-color: #2c4a85 !important;
         color: white !important;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.15);
         transform: translateY(-1px);
     }}
     h1, h2, h3 {{
@@ -134,8 +134,8 @@ else:
 
 st.markdown("---")
 
-# 4. 원장님 사양 제미나이 2.5 진짜 AI 엔진 가동 및 실시간 미리보기 통합
-st.subheader("✍️ 4. AI 명품 종합 의견 생성 및 실시간 미리보기")
+# 4. 원장님 사양 제미나이 2.5 진짜 AI 엔진 가동
+st.subheader("✍️ 4. AI 명품 종합 의견 생성")
 if not ai_available:
     st.error("⚠️ Streamlit 설정창에 GEMINI_API_KEY가 등록되지 않았습니다. 기본 양식으로 작동합니다.")
     teacher_feedback = st.text_area("종합 의견 입력", value="학습 전반에 걸쳐 좋은 성취를 보였습니다.")
@@ -184,7 +184,7 @@ else:
     default_text = st.session_state.get("ai_comment", "위의 버튼을 누르면 점수 추이를 분석한 진짜 AI 코멘트가 자동으로 창작됩니다.")
     teacher_feedback = st.text_area("📋 최종 완성된 코멘트 (마우스로 언제든 직접 편집 가능)", value=default_text, height=180)
 
-
+st.markdown("---")
 
 # 5. 결과지 출력 및 이미지 다운로드
 if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
@@ -208,97 +208,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             """
 
         fig_width = max(5, len(selected_subjects) * 1.5)
-        fig, ax = plt.subplots(figsize=(fig_width, 3.5))
-        x_indices = range(len(selected_subjects))
-        bar_width = 0.35
-        rects1 = ax.bar([x - bar_width/2 for x in x_indices], past_scores, bar_width, label='지난달', color='#B0C4DE')
-        rects2 = ax.bar([x + bar_width/2 for x in x_indices], current_scores, bar_width, label='이번달', color=LOGO_COLOR)
-        ax.set_ylabel('점수 (점)')
-        ax.set_title(f'{student_name} 학생의 영역별 성적 비교', fontsize=12, fontweight='bold', pad=10, color=LOGO_COLOR)
-        ax.set_xticks(x_indices)
-        short_labels = [s.split()[0] for s in selected_subjects]
-        ax.set_xticklabels(short_labels, fontsize=9)
-        ax.set_ylim(0, 110)
-        ax.legend()
-        ax.grid(axis='y', linestyle='--', alpha=0.5)
-        ax.bar_label(rects1, padding=3)
-        ax.bar_label(rects2, padding=3)
-        plt.tight_layout()
-
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=150)
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-        plt.close()
-
-        html_layout = f"""
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-        <div style="margin-bottom: 25px;">
-            <button onclick="takeScreenshot()" style="background-color: {LOGO_COLOR}; color: white; border: none; padding: 14px 24px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-family: sans-serif; transition: all 0.2s;">
-                📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
-            </button>
-        </div>
-        <div id="capture-area" style="padding: 35px; background-color: {LOGO_COLOR}; border-radius: 12px; font-family: 'Malgun Gothic', sans-serif; color: white; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 18px;">
-                <div style="display: flex; align-items: center;">
-                    <div style="width: 55px; height: 55px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <span style="color: {LOGO_COLOR}; font-weight: 900; font-size: 18px; letter-spacing: -0.5px;">YMS</span>
-                    </div>
-                    <div style="text-align: left;">
-                        <h1 style="color: white !important; margin: 0; font-size: 23px; font-family: sans-serif; font-weight: bold; letter-spacing: 0.5px;">와이엠에스 영어과</h1>
-                        <p style="color: rgba(255,255,255,0.6) !important; margin: 2px 0 0 0; font-size: 11px; font-family: sans-serif; font-weight: bold; letter-spacing: 1px;">YMS ENGLISH </p>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 14px; font-weight: bold; color: #E5A93C; letter-spacing: 0.5px;">Your Mastery Solution</div>
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 4px; font-style: italic; font-family: serif;">True learning builds the bridge from effort to excellence.</div>
-                </div>
-            </div>
-            
-            <div style="font-size: 28px; font-weight: bold; text-align: left; margin-bottom: 5px; color: white; letter-spacing: 0.5px;">YMS Monthly Test Report</div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가</div>
-            
-            <div style="background: white; border-radius: 8px; padding: 30px; color: #333333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14.5px; font-family: sans-serif; background:#f8f9fa; padding:10px 15px; border-radius:6px; color:#444;">
-                    <div>
-                        <b>이름:</b> <span style="color:#111; font-weight:600;">{student_name}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                        <b>학년:</b> <span style="color:#111; font-weight:600;">{student_level}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                        <b>교재:</b> <span style="color:#111; font-weight:600;">{current_book}</span>
-                    </div>
-                </div>
-                <h3 style="margin-top: 25px; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px; margin-bottom: 12px;">📈 영역별 성취 레벨</h3>
-                <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 30px; font-family: sans-serif; border: 1px solid #eaeaea;">
-                    <thead>
-                        <tr style="background-color: #f8f9fa; font-weight: bold; border-bottom: 1px solid #eaeaea; color:#555;">
-                            <td style="padding: 12px; width: 35%;">평가 영역</td>
-                            <td style="padding: 12px;">지난달 점수</td>
-                            <td style="padding: 12px;">이번달 점수</td>
-                            <td style="padding: 12px;">변화량</td>
-                        </tr>
-                    </thead>
-                    <tbody>{df_html_rows}</tbody>
-                </table>
-                <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 15px; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px;">📊 지난달 대비 성적 추이</h3>
-                <div style="text-align: center; margin-bottom: 30px; background:#fafafa; padding:15px; border-radius:8px; border:1px solid #f1f1f1;">
-                    <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
-                </div>
-                <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 12px; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px;">💌 선생님 종합 의견</h3>
-                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 18px; border-radius: 6px; font-size: 13.5px; line-height: 1.65; text-align: left; font-family: sans-serif; color: #111111;">
-                    {teacher_feedback.replace('\n', '<br>')}
-                </div>
-            </div>
-        </div>
-        <script>
-        function takeScreenshot() {{
-            const element = document.getElementById("capture-area");
-            html2canvas(element, {{ scale: 2, useCORS: true }}).then(canvas => {{
-                const link = document.createElement('a');
-                link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
-                link.href = canvas.toToDataURL('image/png');
-                link.click();
-            }});
-        }}
-        </script>
-        """
-        components.html(html_layout, height=1080, scrolling=True)
+        fig, ax
