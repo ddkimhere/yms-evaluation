@@ -231,7 +231,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
         plt.close()
 
-        # [오류 해결 완료]: 자바스크립트 내부의 모든 단일 중괄호를 이중 중괄호({{, }})로 변경하여 f-string 충돌 완벽 차단
+        # html_layout 정의 및 자바스크립트 내 이중 중괄호 처리 안정화 구조 유지
         html_layout = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
         <div style="margin-bottom: 25px;">
@@ -258,11 +258,11 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
             </div>
             
             <div style="font-size: 28px; font-weight: bold; text-align: left; margin-bottom: 5px; color: white; letter-spacing: 0.5px;">YMS Monthly Test Report</div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가 · {current_book}</div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.75); text-align: left; margin-bottom: 25px;">2026년 {evaluation_month} 정기 평가</div>
             
             <div style="background: white; border-radius: 8px; padding: 30px; color: #333333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14.5px; font-family: sans-serif; background:#f8f9fa; padding:10px 15px; border-radius:6px; color:#444;">
-                    <div><b>이름:</b> <span style="color:#111; font-weight:600;">{student_name}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> <span style="color:#111; font-weight:600;">{student_level}</span></div>
+                    <div><b>이름:</b> <span style="color:#111; font-weight:600;">{student_name}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>학년:</b> <span style="color:#111; font-weight:600;">{student_level}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>교재:</b> <span style="color:#111; font-weight:600;">{current_book}</span></div>
                 </div>
                 <h3 style="margin-top: 25px; font-size: 16px; color: {LOGO_COLOR} !important; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px; margin-bottom: 12px;">📈 영역별 성취 레벨</h3>
                 <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 30px; font-family: sans-serif; border: 1px solid #eaeaea;">
