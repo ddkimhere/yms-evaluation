@@ -231,7 +231,7 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
         plt.close()
 
-        # [완벽 연동 패치]: 내부 자바스크립트가 capture-area 전체를 찍어 Blob 파일로 브라우저에 강제 하향 전송하는 구조 복원
+        # [오류 해결 완료]: 자바스크립트 내부의 모든 단일 중괄호를 이중 중괄호({{, }})로 변경하여 f-string 충돌 완벽 차단
         html_layout = f"""
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
         <div style="margin-bottom: 25px;">
@@ -281,4 +281,39 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                     <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
                 </div>
                 <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 12px; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px;">💌 선생님 종합 의견</h3>
-                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding:
+                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 18px; border-radius: 6px; font-size: 13.5px; line-height: 1.65; text-align: left; font-family: sans-serif; color: #111111;">
+                    {teacher_feedback.replace('\\n', '<br>')}
+                </div>
+            </div>
+        </div>
+        
+        <script>
+        function takeScreenshot() {{
+            if (typeof html2canvas === 'undefined') {{
+                alert("라이브러리를 불러오는 중입니다. 1초 뒤에 다시 눌러주세요!");
+                return;
+            }}
+            
+            const element = document.getElementById("capture-area");
+            
+            html2canvas(element, {{
+                scale: 2,
+                useCORS: true,
+                backgroundColor: null,
+                logging: false
+            }}).then(canvas => {{
+                canvas.toBlob(function(blob) {{
+                    const link = document.createElement('a');
+                    link.download = "{evaluation_month}_{student_name}_Monthly_Test.png";
+                    link.href = URL.createObjectURL(blob);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }}, 'image/png');
+            }}).catch(err => {{
+                alert("이미지 캡처 중 오류가 발생했습니다.");
+            }});
+        }}
+        </script>
+        """
+        components.html(html_layout, height=1120, scrolling=True)
