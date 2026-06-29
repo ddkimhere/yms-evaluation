@@ -148,7 +148,6 @@ else:
     if st.button("🤖 AI에게 실시간 5문장 창작 추천받기", type="secondary"):
         with st.spinner("AI가 학생의 점수 변화와 키워드를 분석하여 5문장 코멘트를 생성하고 있습니다..."):
             try:
-                # [문법 수정 완료]: SyntaxError가 발생하지 않도록 한 줄 처리로 완벽 방어
                 score_summary = ""
                 for idx, subj in enumerate(selected_subjects):
                     score_summary += f"- {subj}: 지난달 {past_scores[idx]}점 -> 이번달 {current_scores[idx]}점\\n"
@@ -230,20 +229,16 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
         plt.savefig(buf, format='png', dpi=150)
         buf.seek(0)
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-        
-        download_bytes = buf.getvalue()
         plt.close()
 
-        # 고안정성 순정 다운로드 시스템 유지
-        st.download_button(
-            label="💾 카톡 전송용 결과지 이미지(PNG) 안전하게 다운로드하기",
-            data=download_bytes,
-            file_name=f"{evaluation_month}_{student_name}_Monthly_Test.png",
-            mime="image/png",
-            use_container_width=True
-        )
-
+        # [완벽 연동 패치]: 내부 자바스크립트가 capture-area 전체를 찍어 Blob 파일로 브라우저에 강제 하향 전송하는 구조 복원
         html_layout = f"""
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+        <div style="margin-bottom: 25px;">
+            <button onclick="takeScreenshot()" style="background-color: {LOGO_COLOR}; color: white; border: none; padding: 14px 24px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-family: sans-serif; transition: all 0.2s;">
+                📸 카톡 전송용 결과지 이미지(PNG) 다운로드하기
+            </button>
+        </div>
         <div id="capture-area" style="padding: 35px; background-color: {LOGO_COLOR}; border-radius: 12px; font-family: 'Malgun Gothic', sans-serif; color: white; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 18px;">
@@ -286,10 +281,4 @@ if st.button("✨ 월말평가 결과지 생성하기", type="primary"):
                     <img src="data:image/png;base64,{img_base64}" style="max-width: 100%; height: auto;" />
                 </div>
                 <h3 style="font-size: 16px; color: {LOGO_COLOR} !important; margin-bottom: 12px; font-family: sans-serif; font-weight:700; border-left: 4px solid {LOGO_COLOR}; padding-left: 8px;">💌 선생님 종합 의견</h3>
-                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding: 18px; border-radius: 6px; font-size: 13.5px; line-height: 1.65; text-align: left; font-family: sans-serif; color: #111111;">
-                    {teacher_feedback.replace('\n', '<br>')}
-                </div>
-            </div>
-        </div>
-        """
-        components.html(html_layout, height=1050, scrolling=True)
+                <div style="background-color: {LOGO_LIGHT_BG}; border-left: 5px solid {LOGO_COLOR}; padding:
