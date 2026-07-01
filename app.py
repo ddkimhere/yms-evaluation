@@ -170,7 +170,7 @@ else:
                 5. 정중하고 따뜻한 어조 (~합니다 체)를 쓰고, 이모티콘은 넣지마.
                 6. YMS영어학원 이란 말 너무 많이 쓰지마.
                 7. 문장 너무 길게 쓰지마. 
-                8. 학생 이름은 성 없이 이름으로 불러줘.
+             
                 """
                 response = model.generate_content(prompt)
                 st.session_state["ai_comment"] = response.text
